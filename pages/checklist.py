@@ -320,6 +320,58 @@ with tab_stepup:
 
         su_prog = get_stepup_progress(target_un)
 
+        # 編集モードトグル（管理者のみ）
+        edit_mode = False
+        if _is_manager:
+            edit_mode = st.toggle("✏️ 編集モード", key="stepup_edit_mode")
+
+        # ── 編集モード ────────────────────────────────────────────
+        if edit_mode and _is_manager:
+            st.markdown("#### 📝 ステップアップ表の項目編集")
+            stepup2 = get_stepup_data()
+            stages2 = stepup2.get("stages", [])
+            for s_idx, stage in enumerate(stages2):
+                st.markdown(f"##### 📌 {stage['title']}")
+                new_title  = st.text_input("ステージ名", value=stage["title"],
+                                           key=f"stitle_{s_idx}")
+                new_target = st.text_input("達成目安", value=stage.get("target", ""),
+                                           key=f"starget_{s_idx}")
+                for sec_idx, sec in enumerate(stage.get("sections", [])):
+                    st.markdown(f"**{sec['name']}**")
+                    new_sec_name = st.text_input("セクション名", value=sec["name"],
+                                                  key=f"secname_{s_idx}_{sec_idx}")
+                    new_items = []
+                    for i_idx, item in enumerate(sec["items"]):
+                        c1, c2 = st.columns([10, 1])
+                        with c1:
+                            new_item = st.text_input(
+                                "", value=item,
+                                key=f"item_{s_idx}_{sec_idx}_{i_idx}",
+                                label_visibility="collapsed"
+                            )
+                        with c2:
+                            if st.button("🗑️", key=f"del_{s_idx}_{sec_idx}_{i_idx}"):
+                                stages2[s_idx]["sections"][sec_idx]["items"].pop(i_idx)
+                                save_stepup_data({"stages": stages2})
+                                st.rerun()
+                        new_items.append(new_item)
+                    add_item = st.text_input("➕ 項目を追加",
+                                              placeholder="新しい項目を入力",
+                                              key=f"add_{s_idx}_{sec_idx}")
+                    if add_item:
+                        new_items.append(add_item)
+                    stages2[s_idx]["sections"][sec_idx]["name"] = new_sec_name
+                    stages2[s_idx]["sections"][sec_idx]["items"] = new_items
+                stages2[s_idx]["title"]  = new_title
+                stages2[s_idx]["target"] = new_target
+
+                if st.button(f"💾 「{stage['title']}」を保存",
+                             key=f"save_s_{s_idx}", type="primary"):
+                    save_stepup_data({"stages": stages2})
+                    st.success("保存しました！")
+                    st.rerun()
+            st.divider()
+
         # 全体進捗
         all_total = sum(
             sum(len(s["items"]) for s in stage.get("sections", []))
@@ -394,46 +446,3 @@ with tab_stepup:
             st.success("保存しました！")
             st.rerun()
 
-        # 管理者: 項目編集
-        if _is_manager:
-            st.divider()
-            with st.expander("⚙️ ステップアップ表の項目編集"):
-                stepup2 = get_stepup_data()
-                stages2 = stepup2.get("stages", [])
-                for s_idx, stage in enumerate(stages2):
-                    st.markdown(f"##### 📌 {stage['title']}")
-                    new_title  = st.text_input("ステージ名", value=stage["title"],
-                                               key=f"stitle_{s_idx}")
-                    new_target = st.text_input("達成目安", value=stage.get("target", ""),
-                                               key=f"starget_{s_idx}")
-                    for sec_idx, sec in enumerate(stage.get("sections", [])):
-                        st.markdown(f"**{sec['name']}**")
-                        new_sec_name = st.text_input("セクション名", value=sec["name"],
-                                                      key=f"secname_{s_idx}_{sec_idx}")
-                        new_items = []
-                        for i_idx, item in enumerate(sec["items"]):
-                            c1, c2 = st.columns([10, 1])
-                            with c1:
-                                new_item = st.text_input(
-                                    "", value=item,
-                                    key=f"item_{s_idx}_{sec_idx}_{i_idx}",
-                                    label_visibility="collapsed"
-                                )
-                            with c2:
-                                if not st.button("🗑️", key=f"del_{s_idx}_{sec_idx}_{i_idx}"):
-                                    new_items.append(new_item)
-                        add_item = st.text_input("➕ 項目を追加",
-                                                  placeholder="新しい項目を入力",
-                                                  key=f"add_{s_idx}_{sec_idx}")
-                        if add_item:
-                            new_items.append(add_item)
-                        stages2[s_idx]["sections"][sec_idx]["name"] = new_sec_name
-                        stages2[s_idx]["sections"][sec_idx]["items"] = new_items
-                    stages2[s_idx]["title"]  = new_title
-                    stages2[s_idx]["target"] = new_target
-
-                    if st.button(f"💾 「{stage['title']}」を保存",
-                                 key=f"save_s_{s_idx}", type="primary"):
-                        save_stepup_data({"stages": stages2})
-                        st.success("保存しました！")
-                        st.rerun()
