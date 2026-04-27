@@ -450,14 +450,34 @@ def require_manager():
         st.stop()
 
 def sidebar_user():
+    import base64
     user = st.session_state.get("user", {})
     role_label = ROLE_LABELS.get(user.get("role", ""), "")
     store = get_store_settings()
     branch = store.get("store_branch", "")
     store_line = store.get("store_name", "CoCo壱番屋") + (f" {branch}" if branch else "")
+
+    # ロゴ（クリックでホームへ）
+    logo_b64 = None
+    for fname in ["COCO-LOGO_20190127120302.png", "coco_logo.png", "logo.png"]:
+        lp = os.path.join(ROOT_DIR, fname)
+        if os.path.exists(lp):
+            with open(lp, "rb") as f:
+                logo_b64 = base64.b64encode(f.read()).decode()
+            break
+    if logo_b64:
+        st.sidebar.markdown(f"""
+<div style="text-align:center; padding: 12px 8px 4px;">
+  <img src="data:image/png;base64,{logo_b64}"
+       style="max-width:140px; width:80%; cursor:pointer;">
+</div>
+""", unsafe_allow_html=True)
+    if st.sidebar.button("🏠 ホームへ", use_container_width=True, key="sidebar_home_btn"):
+        st.switch_page("pages/home.py")
+
     st.sidebar.markdown(f"""
 <div class="sidebar-user">
-  <div class="name">🍛 {user.get('name', '')}</div>
+  <div class="name">👤 {user.get('name', '')}</div>
   <div class="role">{role_label}</div>
   <div style="font-size:0.72rem;color:#888;margin-top:4px;">{store_line}</div>
 </div>

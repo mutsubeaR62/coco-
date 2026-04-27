@@ -1,11 +1,20 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
+import base64
 from utils import (apply_theme, login_user, award_stamps, show_new_stamps,
                    add_user, get_secret_question, verify_secret_answer,
-                   reset_password, SECRET_QUESTIONS, get_all_users)
+                   reset_password, SECRET_QUESTIONS, get_all_users, ROOT_DIR)
 
 apply_theme()
+
+def _logo_b64():
+    for fname in ["COCO-LOGO_20190127120302.png", "coco_logo.png", "logo.png"]:
+        p = os.path.join(ROOT_DIR, fname)
+        if os.path.exists(p):
+            with open(p, "rb") as f:
+                return base64.b64encode(f.read()).decode()
+    return None
 
 st.markdown("""
 <style>
@@ -24,7 +33,17 @@ st.markdown("""
 _, col, _ = st.columns([0.5, 3, 0.5])
 
 with col:
-    st.markdown("""
+    b64 = _logo_b64()
+    if b64:
+        st.markdown(f"""
+<div style="text-align:center; margin: 32px 0 24px;">
+  <img src="data:image/png;base64,{b64}"
+       style="max-width:200px; width:60%; margin-bottom:8px;">
+  <div style="font-size:0.95rem; color:#666; margin-top:4px;">スタッフ専用アプリ</div>
+</div>
+""", unsafe_allow_html=True)
+    else:
+        st.markdown("""
 <div style="text-align:center; margin: 32px 0 24px;">
   <div style="font-size:3.6rem;">🍛</div>
   <div style="font-size:1.8rem; font-weight:700; color:#e85d04; margin-top:8px;">CoCo壱番屋</div>

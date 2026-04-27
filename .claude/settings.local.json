@@ -14,7 +14,11 @@
       "Bash(py -c \"import ast; ast.parse\\(open\\('pages/orders.py', encoding='utf-8'\\).read\\(\\)\\); print\\('orders.py OK'\\)\")",
       "Bash(py -c ' *)",
       "Bash(py -m pip install openpyxl -q)",
-      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\dumen\\\\OneDrive\\\\\" | Where-Object {$_.Extension -eq \".xlsx\"} | Select-Object Name, FullName)"
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\dumen\\\\OneDrive\\\\\" | Where-Object {$_.Extension -eq \".xlsx\"} | Select-Object Name, FullName)",
+      "Bash(py -m streamlit run main.py --server.headless true)",
+      "Bash(grep -iE \"\\\\.\\(png|jpg|jpeg|gif|webp|svg\\)$\")",
+      "Bash(py -c \"import ast; ast.parse\\(open\\('C:/coco壱番屋/pages/login.py', encoding='utf-8'\\).read\\(\\)\\); print\\('login.py OK'\\)\")",
+      "Bash(py -c \"import ast; ast.parse\\(open\\('C:/coco壱番屋/utils.py', encoding='utf-8'\\).read\\(\\)\\); print\\('utils.py OK'\\)\")"
     ]
   }
 }
