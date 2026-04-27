@@ -11,7 +11,10 @@
       "Bash(py -c \"import ast; ast.parse\\(open\\('utils.py', encoding='utf-8'\\).read\\(\\)\\); print\\('utils.py OK'\\)\")",
       "Bash(py -c \"import ast; ast.parse\\(open\\('pages/admin.py', encoding='utf-8'\\).read\\(\\)\\); print\\('admin.py OK'\\)\")",
       "Bash(py -c \"import ast; ast.parse\\(open\\('pages/shift.py', encoding='utf-8'\\).read\\(\\)\\); print\\('shift.py OK'\\)\")",
-      "Bash(py -c \"import ast; ast.parse\\(open\\('pages/orders.py', encoding='utf-8'\\).read\\(\\)\\); print\\('orders.py OK'\\)\")"
+      "Bash(py -c \"import ast; ast.parse\\(open\\('pages/orders.py', encoding='utf-8'\\).read\\(\\)\\); print\\('orders.py OK'\\)\")",
+      "Bash(py -c ' *)",
+      "Bash(py -m pip install openpyxl -q)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\dumen\\\\OneDrive\\\\\" | Where-Object {$_.Extension -eq \".xlsx\"} | Select-Object Name, FullName)"
     ]
   }
 }
