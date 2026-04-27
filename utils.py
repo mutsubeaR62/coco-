@@ -467,13 +467,11 @@ def sidebar_user():
             break
     if logo_b64:
         st.sidebar.markdown(f"""
-<div style="text-align:center; padding: 12px 8px 4px;">
+<a href="/" target="_self" style="display:block; padding: 10px 8px 4px 8px;">
   <img src="data:image/png;base64,{logo_b64}"
-       style="max-width:140px; width:80%; cursor:pointer;">
-</div>
+       style="width:110px; cursor:pointer; display:block;">
+</a>
 """, unsafe_allow_html=True)
-    if st.sidebar.button("🏠 ホームへ", use_container_width=True, key="sidebar_home_btn"):
-        st.switch_page("pages/home.py")
 
     st.sidebar.markdown(f"""
 <div class="sidebar-user">
