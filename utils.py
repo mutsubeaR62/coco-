@@ -450,28 +450,11 @@ def require_manager():
         st.stop()
 
 def sidebar_user():
-    import base64
     user = st.session_state.get("user", {})
     role_label = ROLE_LABELS.get(user.get("role", ""), "")
     store = get_store_settings()
     branch = store.get("store_branch", "")
     store_line = store.get("store_name", "CoCo壱番屋") + (f" {branch}" if branch else "")
-
-    # ロゴ（クリックでホームへ）
-    logo_b64 = None
-    for fname in ["COCO-LOGO_20190127120302.png", "coco_logo.png", "logo.png"]:
-        lp = os.path.join(ROOT_DIR, fname)
-        if os.path.exists(lp):
-            with open(lp, "rb") as f:
-                logo_b64 = base64.b64encode(f.read()).decode()
-            break
-    if logo_b64:
-        st.sidebar.markdown(f"""
-<a href="/" target="_self" style="display:block; padding: 10px 8px 4px 8px;">
-  <img src="data:image/png;base64,{logo_b64}"
-       style="width:110px; cursor:pointer; display:block;">
-</a>
-""", unsafe_allow_html=True)
 
     st.sidebar.markdown(f"""
 <div class="sidebar-user">
