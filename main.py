@@ -57,11 +57,6 @@ else:
     user = st.session_state.user
 
     # ロゴクリックでホームへ（サイドバー最上部に透明ボタン）
-    st.sidebar.markdown('<div class="logo-home-btn">', unsafe_allow_html=True)
-    if st.sidebar.button("home", key="logo_home", label_visibility="collapsed"):
-        st.switch_page("pages/home.py")
-    st.sidebar.markdown('</div>', unsafe_allow_html=True)
-
     sidebar_user()
 
     role = user.get("role", "kenshu")
