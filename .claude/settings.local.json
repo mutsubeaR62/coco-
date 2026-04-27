@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version)",
+      "Bash(python -c \"import json; d=json.load\\(open\\('C:/coco壱番屋/data/products.json', encoding='utf-8'\\)\\); prods=d['products']; print\\(f'総商品数: {len\\(prods\\)}件'\\); has_std=[p for p in prods if p['standards']['default'] is not None]; print\\(f'定数あり: {len\\(has_std\\)}件'\\); from collections import Counter; locs=Counter\\(p['location'] for p in prods\\); print\\('\\\\\\\\n保管場所:'\\); [print\\(f'  {l}: {c}件'\\) for l,c in sorted\\(locs.items\\(\\)\\)]\")",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import sys; [print\\(l\\) for l in sys.stdin.read\\(\\).encode\\('cp932', errors='replace'\\).decode\\('cp932'\\)]\")",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\coco壱番屋\\\\__pycache__\" -ErrorAction SilentlyContinue)",
+      "Bash(python -c \"import utils; print\\('OK'\\)\")",
+      "Bash(python -c \"from utils import get_today_birthdays; print\\('OK'\\)\")"
+    ]
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "users": [
+    {
+      "username": "manager",
+      "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
+      "name": "店長",
+      "role": "admin",
+      "employee_type": "seishain",
+      "hourly_wage": 1500,
+      "birthday": "",
+      "coco_spec": {
+        "service": null,
+        "cooking": null
+      },
+      "joined": "2020-04-01"
+    },
+    {
+      "username": "staff1",
+      "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
+      "name": "先輩スタッフ",
+      "role": "mate",
+      "employee_type": "baito",
+      "hourly_wage": 1100,
+      "birthday": "",
+      "coco_spec": {
+        "service": null,
+        "cooking": null
+      },
+      "joined": "2023-04-01"
+    },
+    {
+      "username": "new1",
+      "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
+      "name": "新人さん",
+      "role": "kenshu",
+      "employee_type": "baito",
+      "hourly_wage": 1050,
+      "birthday": "",
+      "coco_spec": {
+        "service": null,
+        "cooking": null
+      },
+      "joined": "2026-04-24"
+    },
+    {
+      "username": "orino",
+      "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
+      "name": "織野允也",
+      "role": "mate",
+      "employee_type": "baito",
+      "hourly_wage": 1230,
+      "birthday": "11-25",
+      "coco_spec": {
+        "service": "3級",
+        "cooking": "3級"
+      },
+      "joined": "2026-04-26"
+    },
+    {
+      "username": "ryogo",
+      "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
+      "name": "北澤綾悟",
+      "role": "daiko",
+      "employee_type": "baito",
+      "hourly_wage": 1500,
+      "birthday": "09-05",
+      "coco_spec": {
+        "service": "2級",
+        "cooking": "2級"
+      },
+      "joined": "2026-04-26"
+    },
+    {
+      "username": "mutsu62",
+      "password": "73ba3fbdeb6809a55a42f26aae1a1b4d6793053791c2f1a0437004bc075b8ec9",
+      "name": "染谷篤夢",
+      "role": "admin",
+      "employee_type": "baito",
+      "hourly_wage": 1210,
+      "birthday": "11-04",
+      "coco_spec": {
+        "service": "3級",
+        "cooking": null
+      },
+      "secret_question": "好きなアーティスト・バンド名は？",
+      "secret_answer": "9e07f31b9a060724eb36c23241d15ef7db9cd8199b264f22d4c9bd6b351d7261",
+      "joined": "2026-04-27"
+    }
+  ]
+}

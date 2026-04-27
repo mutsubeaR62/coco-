@@ -1,0 +1,62 @@
+{
+  "staff1": {
+    "stamps": [
+      "first_login"
+    ],
+    "quiz_scores": [],
+    "quiz_attempts": 0,
+    "checklist_completions": {},
+    "manual_read": [],
+    "order_count": 0
+  },
+  "manager": {
+    "stamps": [
+      "first_login"
+    ],
+    "quiz_scores": [],
+    "quiz_attempts": 0,
+    "checklist_completions": {},
+    "manual_read": [],
+    "order_count": 0
+  },
+  "new1": {
+    "stamps": [
+      "first_login"
+    ],
+    "quiz_scores": [],
+    "quiz_attempts": 0,
+    "checklist_completions": {},
+    "manual_read": [],
+    "order_count": 0
+  },
+  "orino": {
+    "stamps": [
+      "first_login"
+    ],
+    "quiz_scores": [],
+    "quiz_attempts": 0,
+    "checklist_completions": {},
+    "manual_read": [],
+    "order_count": 0
+  },
+  "ryogo": {
+    "stamps": [
+      "first_login"
+    ],
+    "quiz_scores": [],
+    "quiz_attempts": 0,
+    "checklist_completions": {},
+    "manual_read": [],
+    "order_count": 0
+  },
+  "mutsu62": {
+    "stamps": [
+      "first_login"
+    ],
+    "quiz_scores": [],
+    "quiz_attempts": 0,
+    "checklist_completions": {},
+    "manual_read": [],
+    "order_count": 0
+  }
+}

@@ -1,0 +1,2224 @@
+{
+  "products": [
+    {
+      "name": "bitコロッケ",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "⭐⭐残り3袋になったら報告⭐⭐",
+      "rare": false,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "濃厚バニラアイス47個",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "⭐⭐バラ数で15個以下になったら「0」、 それ以上は「1」を入力⭐⭐ ※発注してから納品まで4日以上かかります※ 重複して発注しないように、発注した場合は必ずメモを残しておいてください",
+      "rare": true,
+      "standards": {
+        "default": 0,
+        "friday": 0,
+        "event": 0
+      },
+      "active": true
+    },
+    {
+      "name": "カリフラワー",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "最低100ｇ1バット、200ｇ1バット仕込み。 その上で仕込みなしの袋をカウント",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍じゃがいも1kg",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "仕込み1袋丸々は２としてカウントを足す",
+      "rare": false,
+      "standards": {
+        "default": 7,
+        "friday": 8,
+        "event": 8
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍インゲン",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "開封しているのはカウントしない",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ニンジンアチャール",
+      "location": "業冷庫（左上）",
+      "note": "開封してるのは数えずにカウント",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "フライドポテト1ｋｇ",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "仕込んであるもの丸々は２でカウントする。",
+      "rare": false,
+      "standards": {
+        "default": 16,
+        "friday": 19,
+        "event": 19
+      },
+      "active": true
+    },
+    {
+      "name": "牛カレーソース",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 8,
+        "friday": 8,
+        "event": 8
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍キャベツ",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "仕込み１袋も１としてカウント。 仕込みが2、未開封が2なら、「４」でカウント",
+      "rare": false,
+      "standards": {
+        "default": 10,
+        "friday": 10,
+        "event": 10
+      },
+      "active": true
+    },
+    {
+      "name": "スパイスチキン",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "未開封の袋数を入力",
+      "rare": false,
+      "standards": {
+        "default": 5,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "ポークカレーパン",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 10,
+        "friday": 10,
+        "event": 10
+      },
+      "active": true
+    },
+    {
+      "name": "ケララチキンカレーペースト",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "とろたまフライ",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "ささみ",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 14,
+        "friday": 16,
+        "event": 16
+      },
+      "active": true
+    },
+    {
+      "name": "刻みわさび",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "開封していたら「０」 未開封が「１」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ポップコーンシュリンプ",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ボイルドビーフ",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 10,
+        "friday": 13,
+        "event": 15
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍菜の花",
+      "location": "ゆーねる側業冷庫右下",
+      "note": "表側が少なかったら 補充すること！",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "穂先竹の子土佐煮",
+      "location": "業冷庫（左上）",
+      "note": "表側の業冷庫が少なかったら 補充すること",
+      "rare": false,
+      "standards": {
+        "default": 5,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "乾燥桜エビ",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "キリンカラダFREE6缶パック",
+      "location": "ゆーねる側業冷庫",
+      "note": "6本パックで「１」空いていたら「０」 表のショーケースの補充も 確認すること",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "タッピー",
+      "location": "ゆーねる側業冷庫",
+      "note": "1箱単位でカウント。3本単位",
+      "rare": false,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "POS OES用ロール紙",
+      "location": "ゆーねる棚の下",
+      "note": "箱が丸々あったら「１」 1切っていたら「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "コーラ160ｍｌ（30缶）",
+      "location": "ゆーねる棚の下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ばかたれ（たれカツ用）",
+      "location": "ゆーねる棚の下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "ウーロン茶500ml24本",
+      "location": "ゆーねる棚の下",
+      "note": "基本発注無し",
+      "rare": true,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "弁当セット（40個）",
+      "location": "更衣室",
+      "note": "パントリーに蓋を補充する。そのあとに、 外蓋の数をカウントする",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "ウスターソース300ml",
+      "location": "更衣室",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "オリジナルドレッシング1L",
+      "location": "更衣室",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ごまドレ1L",
+      "location": "更衣室",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "シーザードレッシング１Ｌ",
+      "location": "更衣室",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "芳醇ソース300g（6本）",
+      "location": "更衣室",
+      "note": "箱が空いていたら「０」 空いてなかったら「１」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "TOキャリングケース10個",
+      "location": "更衣室",
+      "note": "箱が空いていたら「０」 空いてなかったら「１」",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "レトルト ビーフ10個",
+      "location": "更衣室",
+      "note": "レジ前に補充をする。 そのあとに、10個のパックがあったら「1」無しで「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "レトルト ポーク10個",
+      "location": "更衣室",
+      "note": "レジ前に補充をする。 そのあとに、10個のパックがあったら「1」無しで「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "レトルト 野菜10個",
+      "location": "更衣室",
+      "note": "レジ前に補充をする。 そのあとに、10個のパックがあったら「1」無しで「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "レトルトキーマ10個",
+      "location": "更衣室",
+      "note": "レジ前に補充をする。 そのあとに、10個のパックがあったら「1」無しで「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "レトルト 甘口10個",
+      "location": "更衣室",
+      "note": "レジ前に補充をする。 そのあとに、10個のパックがあったら「1」無しで「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "レトルト激辛",
+      "location": "更衣室",
+      "note": "レジ前に補充をする。 そのあとに、10個のパックがあったら「1」無しで「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "レトルトスープカレー5個",
+      "location": "更衣室",
+      "note": "レジ前に補充をする。 そのあとに、10個のパックがあったら「1」無しで「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "紙おしぼり",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 8,
+        "friday": 8,
+        "event": 9
+      },
+      "active": true
+    },
+    {
+      "name": "TOらっきょう1袋",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 12,
+        "friday": 12,
+        "event": 12
+      },
+      "active": true
+    },
+    {
+      "name": "TO福神漬1袋",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 8,
+        "friday": 8,
+        "event": 8
+      },
+      "active": true
+    },
+    {
+      "name": "TOとび辛スパイス1本",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 5,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "TOオリジナルドレ",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "TOごまドレ",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ラムネ60個",
+      "location": "レジ下",
+      "note": "上の容器に補充をする そのあとに、箱があったら数をカウントする",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "アンパンマングミ20個",
+      "location": "レジ下",
+      "note": "上の容器に補充をする そのあとに、箱があったら数をカウントする",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "つまようじ",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "紙エプロン100枚",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ナフキン150枚",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 10,
+        "friday": 10,
+        "event": 11
+      },
+      "active": true
+    },
+    {
+      "name": "ペーパータオル200枚",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 9,
+        "friday": 9,
+        "event": 9
+      },
+      "active": true
+    },
+    {
+      "name": "アンケートハガキ",
+      "location": "レジ下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "福神漬店内用（8袋）",
+      "location": "レジ下",
+      "note": "8個以上あったら「１」 8以下なら「０」で入力",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 2,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "POSレジ用ロール紙",
+      "location": "レジ左の下",
+      "note": "箱丸々あったら「１」 箱が減っていたら「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "クレジット端末用紙",
+      "location": "レジ左の下",
+      "note": "こちらは、 ロール紙が5個切ったら 1箱発注★クレジット端末で発注★",
+      "rare": false,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "ＴＯ麺用容器台座（５０枚入）",
+      "location": "レジ左の下",
+      "note": "丸が大きい方",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ＴＯソースサラダ容器台座",
+      "location": "レジ左の下",
+      "note": "二つ丸がある方",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "割り箸（個包装）",
+      "location": "レジ左の下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "弁当スプーン（100個）",
+      "location": "レジ左の下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "パリパリチキン",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 12,
+        "friday": 12,
+        "event": 12
+      },
+      "active": true
+    },
+    {
+      "name": "豚しゃぶ10食",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 8,
+        "friday": 9,
+        "event": 9
+      },
+      "active": true
+    },
+    {
+      "name": "フライドチキン",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "チキン煮込み（10食）",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 7,
+        "event": 7
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍ソーセージ",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 10,
+        "friday": 12,
+        "event": 12
+      },
+      "active": true
+    },
+    {
+      "name": "ボイルにんにく1ｋｇ1袋",
+      "location": "ストッカー（大）",
+      "note": "1袋丸々で「１」 空いていれば「０」",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "スクランブルエッグ（10食）",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 7,
+        "friday": 9,
+        "event": 9
+      },
+      "active": true
+    },
+    {
+      "name": "ハンバーグ",
+      "location": "ストッカー（大）",
+      "note": "1袋丸々で「１」 空いていれば「０」",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "ロースポーション",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 14,
+        "friday": 17,
+        "event": 16
+      },
+      "active": true
+    },
+    {
+      "name": "ほうれん草1kg",
+      "location": "ストッカー（大）",
+      "note": "仕込んだバットは「１」でカウントする",
+      "rare": false,
+      "standards": {
+        "default": 7,
+        "friday": 8,
+        "event": 8
+      },
+      "active": true
+    },
+    {
+      "name": "あさり1ｋｇ",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "ボイルムキエビ1ｋｇ",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "なす1ｋｇ",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍玉ねぎスライス",
+      "location": "ゆーねる側業冷庫右上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 8,
+        "friday": 8,
+        "event": 8
+      },
+      "active": true
+    },
+    {
+      "name": "フィッシュフライ（10食）",
+      "location": "ストッカー（大）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "TOソース容器50個",
+      "location": "ストッカーの上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "生パン粉",
+      "location": "ストッカーの上",
+      "note": "ライス場上に「3袋補充」。 そのあとに数をカウントする",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "ゴミ袋45L（100枚）",
+      "location": "ストッカーの上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ビーフ肉",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 8,
+        "event": 8
+      },
+      "active": true
+    },
+    {
+      "name": "ココデチキン10食",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍 ミニナン1枚",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 17,
+        "friday": 17,
+        "event": 17
+      },
+      "active": true
+    },
+    {
+      "name": "納豆4個",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 5,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "クリームコロッケ（20食）",
+      "location": "業冷庫（右上）",
+      "note": "4袋で「1」カウント 8袋で「２」",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "メンチカツ（5食）",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "イカリング",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "イカエンペラ",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ココロッケ(6本）",
+      "location": "業冷庫（右上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "チキンカツ（30食）",
+      "location": "業冷庫（右上）",
+      "note": "6袋で1カウント",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "ロースカツ（50食）",
+      "location": "業冷庫（右上）",
+      "note": "10袋で1カウント",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 4,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍ゆで麺（ラーメン麺）",
+      "location": "業冷庫（右下）",
+      "note": "4袋で1カウント",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "チャーシュー",
+      "location": "業冷庫（右下）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "甘口ポークソース",
+      "location": "業冷庫（右下）",
+      "note": "業冷庫左下に入ってるやつも合わせて数える",
+      "rare": false,
+      "standards": {
+        "default": 14,
+        "friday": 16,
+        "event": 16
+      },
+      "active": true
+    },
+    {
+      "name": "ビーフソース",
+      "location": "業冷庫（右下）",
+      "note": "業冷庫左下に入ってるやつも合わせて数える",
+      "rare": false,
+      "standards": {
+        "default": 8,
+        "friday": 9,
+        "event": 9
+      },
+      "active": true
+    },
+    {
+      "name": "ベジタリアンソース2.2ｋｇ",
+      "location": "業冷庫（右下）",
+      "note": "業冷庫左下に入ってるやつも合わせて数える",
+      "rare": false,
+      "standards": {
+        "default": 5,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "冷凍ナン",
+      "location": "業冷庫（右下）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 15,
+        "friday": 15,
+        "event": 15
+      },
+      "active": true
+    },
+    {
+      "name": "ラーメンスープ（ノーマル30人前）",
+      "location": "業冷庫（左上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "人参パック1袋",
+      "location": "業冷庫（左上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 10,
+        "friday": 13,
+        "event": 13
+      },
+      "active": true
+    },
+    {
+      "name": "ミックスチーズ1kg",
+      "location": "業冷庫（左上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 9,
+        "friday": 10,
+        "event": 10
+      },
+      "active": true
+    },
+    {
+      "name": "キャベツ千切り1袋",
+      "location": "業冷庫（左上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "ココフリル1袋",
+      "location": "業冷庫（左上）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "ポークソース",
+      "location": "業冷庫（左下）",
+      "note": "近くのコンテナに入ってるやつも数えてね",
+      "rare": false,
+      "standards": {
+        "default": 20,
+        "friday": 23,
+        "event": 22
+      },
+      "active": true
+    },
+    {
+      "name": "ストロー（400本）",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "クルトン",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "粉チーズ1ｋｇ",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "フレッシュ18個",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ガムシロップ20個入",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "オリドレ小袋（20個）",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ごまドレ小袋（20個）",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "シーザードレ小袋20個入",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ケチャップ小袋（40個）",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "お子様エプロン（100枚）",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "TO福神容器（フタ、本体）",
+      "location": "パントリー上の棚",
+      "note": "製氷機の隣にあり 蓋だけ、本体だけも発注可能",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "しょう油小袋",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "紙ケース（お子様コーン用カップ）",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "とび辛小袋50個",
+      "location": "パントリー上の棚",
+      "note": "基本発注無し",
+      "rare": true,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "TOサラダ容器",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "はし袋",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "スプーンキャップ共有",
+      "location": "パントリー上の棚",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "野菜生活マンゴー",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "カルピスキッズ",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "リンゴジュース（1本）",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ミルク1L",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 7,
+        "friday": 7,
+        "event": 7
+      },
+      "active": true
+    },
+    {
+      "name": "アイスコーヒー",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "オレンジジュース1L",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 6,
+        "event": 6
+      },
+      "active": true
+    },
+    {
+      "name": "ゼリー50個",
+      "location": "ショーケース（右）",
+      "note": "端数は、 1袋分あれば1で数える",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "プレーンラッシー",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "ツナ",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "ポテトサラダ",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "ゆでタマゴ",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 9,
+        "friday": 11,
+        "event": 11
+      },
+      "active": true
+    },
+    {
+      "name": "コーン缶280ｇ",
+      "location": "ショーケース（右）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 6,
+        "friday": 8,
+        "event": 8
+      },
+      "active": true
+    },
+    {
+      "name": "半熟タマゴ",
+      "location": "ショーケース（左）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "クリーミータルタル500ｇ",
+      "location": "ショーケース（左）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 3,
+        "friday": 3,
+        "event": 3
+      },
+      "active": true
+    },
+    {
+      "name": "スタミナラー油500ｍｌ",
+      "location": "ショーケース（左）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "マヨネーズ小袋4個入",
+      "location": "ショーケース（左）",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "弁当バッグ無地100枚",
+      "location": "提供台周辺",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ポリ手提袋無地小100枚",
+      "location": "提供台周辺",
+      "note": "サラダのテイクアウト用の袋。",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ＴＯ麺用容器フタ（５０枚入）",
+      "location": "提供台周辺",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ＴＯ麺用容器本体（２５枚入）",
+      "location": "提供台周辺",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "甘くなるソース小袋",
+      "location": "提供台周辺",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "芳醇ソース小袋（20個）",
+      "location": "提供台周辺",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 4,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "開封防止シール",
+      "location": "提供台周辺",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "カレーホット",
+      "location": "提供台周辺",
+      "note": "ラーメンの仕上げの液体",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "油汚れ専用洗剤",
+      "location": "洗い場下",
+      "note": "緑のラベル",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ダイバークリーン",
+      "location": "洗い場下",
+      "note": "青のラベル",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ウォッシュメイトココ",
+      "location": "洗い場下",
+      "note": "洗浄機の洗剤 黄色の",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "アルコール除菌剤(サニッシュ）",
+      "location": "洗い場下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "お弁当ラベルシール5巻",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ポリ袋小（長）",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "ポリ袋小（短）",
+      "location": "厨房棚の上",
+      "note": "1=5袋",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "コーンスープ(10個）",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "とび辛店内用1袋",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "きのこ",
+      "location": "ライス場足元",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 5,
+        "friday": 5,
+        "event": 5
+      },
+      "active": true
+    },
+    {
+      "name": "とび辛用油1ｋｇ",
+      "location": "ライス場足元",
+      "note": "ライス場レンジの下",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "食材管理シール5巻",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "バッター粉2kg",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "塩450ｇ",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "特定原材料を含まないカレー12袋",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "甘くなるソース",
+      "location": "ライス場足元",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ベビーフード",
+      "location": "厨房棚の上",
+      "note": "瓶に入っているやーつー",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "1歳からのカレー2袋入",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "ラップ中",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ラップ小",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "TO耐油袋",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "ポリ袋大",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "青ポリ手袋L",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 4,
+        "friday": 4,
+        "event": 4
+      },
+      "active": true
+    },
+    {
+      "name": "青ポリ手袋M",
+      "location": "厨房棚の上",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "ブリーチ",
+      "location": "洗い場下",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "お子様H弁当セット（50個）",
+      "location": "更衣室",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "フライ専用油",
+      "location": "ライス場足元",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "パックライス（30個）",
+      "location": "ライス場足元",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 2,
+        "friday": 2,
+        "event": 2
+      },
+      "active": true
+    },
+    {
+      "name": "シーズニングカレー20個",
+      "location": "ライス場扉の中",
+      "note": "ココデチキンのカレーパウダー",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "AVチェック30枚入",
+      "location": "ライス場扉の中",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "ココロッケ紙100枚",
+      "location": "ライス場扉の中",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "アルミホイル",
+      "location": "ライス場扉の中",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": null,
+        "friday": null,
+        "event": null
+      },
+      "active": true
+    },
+    {
+      "name": "油吸着シート",
+      "location": "ライス場扉の中",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "フードパック100個",
+      "location": "ライス場扉の中",
+      "note": "揚げ物入れる透明のやつ",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "TOチキン用袋",
+      "location": "ライス場扉の中",
+      "note": "ココデチキンの袋",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "無洗米",
+      "location": "休憩室",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 10,
+        "friday": 12,
+        "event": 12
+      },
+      "active": true
+    },
+    {
+      "name": "Ｈチキンボックス用箱",
+      "location": "休憩室",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "チキンボックス用箱",
+      "location": "休憩室",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "テイクアウトナン用箱",
+      "location": "休憩室",
+      "note": "",
+      "rare": true,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "トッピングスパイス",
+      "location": "場所未設定",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "TO用紙袋100枚",
+      "location": "場所未設定",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "カレーパン袋",
+      "location": "場所未設定",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    },
+    {
+      "name": "マジックリン（大）",
+      "location": "場所未設定",
+      "note": "",
+      "rare": false,
+      "standards": {
+        "default": 1,
+        "friday": 1,
+        "event": 1
+      },
+      "active": true
+    }
+  ]
+}
