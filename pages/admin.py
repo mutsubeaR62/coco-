@@ -4,14 +4,15 @@ import streamlit as st
 from utils import (apply_theme, require_admin, page_header,
                    get_all_users, add_user, delete_user, update_user,
                    get_progress, STAMPS, ROLE_LABELS, get_employee_type,
-                   get_coco_spec, coco_spec_badge, SERVICE_LEVELS, COOKING_LEVELS)
+                   get_coco_spec, coco_spec_badge, SERVICE_LEVELS, COOKING_LEVELS,
+                   get_store_settings, save_store_settings)
 
 apply_theme()
 require_admin()
 
 page_header("⚙️ 管理者設定", "メンバー管理・進捗確認")
 
-tab_members, tab_progress, tab_pw = st.tabs(["👥 メンバー管理", "📊 進捗確認", "🔑 パスワード変更"])
+tab_members, tab_progress, tab_pw, tab_store = st.tabs(["👥 メンバー管理", "📊 進捗確認", "🔑 パスワード変更", "🏪 店舗設定"])
 
 # ════ メンバー管理 ══════════════════════════════════════════════
 with tab_members:
@@ -24,14 +25,16 @@ with tab_members:
         r = u.get("role", "new")
         counts[r] = counts.get(r, 0) + 1
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
         st.metric("👑 管理者", counts.get("admin", 0))
     with c2:
-        st.metric("🏪 スタッフ", counts.get("staff", 0))
+        st.metric("🔑 代行", counts.get("daiko", 0))
     with c3:
-        st.metric("🌱 新人", counts.get("new", 0))
+        st.metric("🏪 メイト", counts.get("mate", 0) + counts.get("staff", 0))
     with c4:
+        st.metric("🌱 研修", counts.get("kenshu", 0) + counts.get("new", 0))
+    with c5:
         st.metric("合計", len(users))
 
     st.divider()
@@ -160,14 +163,16 @@ with tab_progress:
     users = get_all_users()
     st.markdown("#### 全メンバーの進捗一覧")
 
-    # 新人のみ絞り込みオプション
-    show_filter = st.selectbox("表示するメンバー", ["全員", "新人のみ", "スタッフのみ", "管理者のみ"],
-                               format_func=lambda x: x)
-    role_filter = {"全員": None, "新人のみ": "new", "スタッフのみ": "staff", "管理者のみ": "admin"}
-    filtered_role = role_filter[show_filter]
+    show_filter = st.selectbox("表示するメンバー",
+                               ["全員", "研修のみ", "メイトのみ", "代行のみ", "管理者のみ"])
+    role_filter_map = {
+        "全員": None, "研修のみ": ("kenshu", "new"),
+        "メイトのみ": ("mate", "staff"), "代行のみ": ("daiko",), "管理者のみ": ("admin",),
+    }
+    filtered_roles = role_filter_map[show_filter]
 
     for u in users:
-        if filtered_role and u.get("role") != filtered_role:
+        if filtered_roles and u.get("role", "kenshu") not in filtered_roles:
             continue
 
         prog = get_progress(u["username"])
@@ -248,3 +253,41 @@ with tab_pw:
             else:
                 update_user(st.session_state.user["username"], password=s_new_pw)
                 st.success("✅ パスワードを変更しました。次回ログインから適用されます。")
+
+# ════ 店舗設定 ═══════════════════════════════════════════════════
+with tab_store:
+    st.markdown("#### 🏪 店舗情報の設定")
+    st.caption("アプリ内に表示される店舗名・店舗番号などを設定できます。")
+
+    current_store = get_store_settings()
+
+    with st.form("store_form"):
+        s_name   = st.text_input("店舗名", value=current_store.get("store_name", "CoCo壱番屋"),
+                                  placeholder="例: CoCo壱番屋")
+        s_branch = st.text_input("店舗・支店名（任意）",
+                                  value=current_store.get("store_branch", ""),
+                                  placeholder="例: 豊田元町店 / 123号店")
+        s_address = st.text_input("住所（任意）",
+                                   value=current_store.get("address", ""),
+                                   placeholder="例: 愛知県豊田市元町1-1")
+        s_tel    = st.text_input("電話番号（任意）",
+                                  value=current_store.get("tel", ""),
+                                  placeholder="例: 0565-XX-XXXX")
+        if st.form_submit_button("💾 保存する", type="primary", use_container_width=True):
+            save_store_settings(
+                store_name=s_name,
+                store_branch=s_branch,
+                address=s_address,
+                tel=s_tel,
+            )
+            st.success("✅ 店舗情報を保存しました！サイドバーに反映されます。")
+            st.rerun()
+
+    st.divider()
+    st.markdown("**現在の設定**")
+    store = get_store_settings()
+    st.write(f"店舗名: **{store.get('store_name', '')}** {store.get('store_branch', '')}")
+    if store.get("address"):
+        st.write(f"住所: {store['address']}")
+    if store.get("tel"):
+        st.write(f"電話: {store['tel']}")

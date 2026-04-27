@@ -452,10 +452,14 @@ def require_manager():
 def sidebar_user():
     user = st.session_state.get("user", {})
     role_label = ROLE_LABELS.get(user.get("role", ""), "")
+    store = get_store_settings()
+    branch = store.get("store_branch", "")
+    store_line = store.get("store_name", "CoCo壱番屋") + (f" {branch}" if branch else "")
     st.sidebar.markdown(f"""
 <div class="sidebar-user">
   <div class="name">🍛 {user.get('name', '')}</div>
   <div class="role">{role_label}</div>
+  <div style="font-size:0.72rem;color:#888;margin-top:4px;">{store_line}</div>
 </div>
 """, unsafe_allow_html=True)
     st.sidebar.markdown("""
@@ -674,3 +678,15 @@ def get_today_birthdays(exclude_username=None):
                 continue
             result.append(u)
     return result
+
+# ─── 店舗設定 ──────────────────────────────────────────────────
+def get_store_settings():
+    return load_json("store_settings.json", {
+        "store_name": "CoCo壱番屋",
+        "store_branch": "",
+    })
+
+def save_store_settings(**kwargs):
+    current = get_store_settings()
+    current.update(kwargs)
+    save_json("store_settings.json", current)

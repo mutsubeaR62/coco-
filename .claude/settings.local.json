@@ -7,7 +7,11 @@
       "Bash(python -c \"import sys; [print\\(l\\) for l in sys.stdin.read\\(\\).encode\\('cp932', errors='replace'\\).decode\\('cp932'\\)]\")",
       "Bash(Remove-Item -Recurse -Force \"C:\\\\coco壱番屋\\\\__pycache__\" -ErrorAction SilentlyContinue)",
       "Bash(python -c \"import utils; print\\('OK'\\)\")",
-      "Bash(python -c \"from utils import get_today_birthdays; print\\('OK'\\)\")"
+      "Bash(python -c \"from utils import get_today_birthdays; print\\('OK'\\)\")",
+      "Bash(py -c \"import ast; ast.parse\\(open\\('utils.py', encoding='utf-8'\\).read\\(\\)\\); print\\('utils.py OK'\\)\")",
+      "Bash(py -c \"import ast; ast.parse\\(open\\('pages/admin.py', encoding='utf-8'\\).read\\(\\)\\); print\\('admin.py OK'\\)\")",
+      "Bash(py -c \"import ast; ast.parse\\(open\\('pages/shift.py', encoding='utf-8'\\).read\\(\\)\\); print\\('shift.py OK'\\)\")",
+      "Bash(py -c \"import ast; ast.parse\\(open\\('pages/orders.py', encoding='utf-8'\\).read\\(\\)\\); print\\('orders.py OK'\\)\")"
     ]
   }
 }

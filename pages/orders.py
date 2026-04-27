@@ -140,15 +140,14 @@ with tab_order:
 
     # ─ 凡例 ─
     st.markdown("""
-<div style='display:flex; gap:16px; flex-wrap:wrap; margin:8px 0 4px; align-items:center;'>
-  <span style='font-weight:600; color:#555; font-size:0.85rem;'>色の見方：</span>
+<div style='display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 4px; align-items:center;'>
   <span style='background:#fff3e0; border:2px solid #e85d04; border-radius:6px;
                padding:2px 10px; font-weight:700; color:#e85d04; font-size:0.85rem;'>
-    ■ 数字 → 発注サイトに入力する数
+    数字 → 発注サイトに入力する数
   </span>
   <span style='background:#f0faf0; border:1px solid #28a745; border-radius:6px;
                padding:2px 10px; color:#28a745; font-size:0.85rem; font-weight:600;'>
-    ✓ 緑 → 発注不要（在庫OK）
+    ✓ → 発注不要
   </span>
   <span style='color:#aaa; font-size:0.85rem;'>— → 定数なし</span>
 </div>
@@ -156,18 +155,15 @@ with tab_order:
 
     st.divider()
 
-    # ─ ヘッダー行 ─
-    hcol1, hcol2, hcol3, hcol4, hcol5 = st.columns([4, 2, 2, 2, 3])
-    with hcol1: st.caption("商品名")
+    # ─ ヘッダー行（スマホでは省略） ─
+    hcol1, hcol2, hcol3 = st.columns([4, 2, 3])
+    with hcol1: st.caption("商品名 / 定数")
     with hcol2: st.caption("現在庫")
-    with hcol3: st.caption("定数")
-    if day_key == "friday":
-        with hcol4: st.caption("木曜翌納")
-    else:
-        with hcol4: st.caption("　")
-    with hcol5:
-        st.markdown("<span style='color:#e85d04; font-weight:700; font-size:0.9rem;'>👉 発注サイト入力数</span>", unsafe_allow_html=True)
-    st.markdown("<hr style='margin:2px 0 8px; border-color:#e85d04; border-width:2px;'>", unsafe_allow_html=True)
+    with hcol3:
+        st.markdown("<span style='color:#e85d04; font-weight:700; font-size:0.9rem;'>👉 発注数</span>",
+                    unsafe_allow_html=True)
+    st.markdown("<hr style='margin:2px 0 8px; border-color:#e85d04; border-width:2px;'>",
+                unsafe_allow_html=True)
 
     # ─ 商品フィルタリング ─
     filtered = [
@@ -205,13 +201,18 @@ with tab_order:
             order    = calc_order(std, stock, next_del)
 
             with st.container():
-                col_name, col_input, col_std, col_next, col_order = st.columns([4, 2, 2, 2, 3])
+                col_name, col_input, col_order = st.columns([4, 2, 3])
 
                 with col_name:
                     badge = "🌟 " if rare else ""
                     st.markdown(f"**{badge}{name}**")
+                    # 定数・木曜翌納をサブテキストで表示
+                    std_txt = f"定数: {std}" if std is not None else "定数: —"
+                    if day_key == "friday" and next_del > 0:
+                        std_txt += f"　木納: +{next_del}"
+                    st.caption(std_txt)
                     if note:
-                        st.caption(f"📌 {note[:55]}{'…' if len(note) > 55 else ''}")
+                        st.caption(f"📌 {note[:40]}{'…' if len(note) > 40 else ''}")
 
                 with col_input:
                     new_stock = st.number_input(
@@ -222,36 +223,23 @@ with tab_order:
                         st.session_state.stock_state[name] = new_stock
                         st.rerun()
 
-                with col_std:
-                    val = str(std) if std is not None else "—"
-                    st.markdown(f"<div style='padding-top:6px; color:#555;'>{val}</div>", unsafe_allow_html=True)
-
-                with col_next:
-                    if day_key == "friday":
-                        nd_val = next_del
-                        color = "#2d6a4f" if nd_val > 0 else "#aaa"
-                        st.markdown(f"<div style='padding-top:6px; color:{color}; font-weight:600;'>+{nd_val}</div>", unsafe_allow_html=True)
-                    else:
-                        st.markdown("<div style='padding-top:6px; color:#ddd;'>—</div>", unsafe_allow_html=True)
-
                 with col_order:
                     if order is None:
-                        st.markdown("<div style='color:#ccc; padding-top:6px; text-align:center;'>—</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='color:#ccc; padding-top:6px; text-align:center;'>—</div>",
+                                    unsafe_allow_html=True)
                     elif order > 0:
                         st.markdown(f"""
 <div style='background:#fff3e0; border:2px solid #e85d04; border-radius:8px;
-            padding:4px 12px; font-size:1.4rem; font-weight:900;
+            padding:4px 8px; font-size:1.5rem; font-weight:900;
             color:#e85d04; text-align:center; letter-spacing:1px;'>
   {order}
 </div>""", unsafe_allow_html=True)
                     else:
                         st.markdown("""
 <div style='background:#f0faf0; border:1px solid #28a745; border-radius:8px;
-            padding:6px 12px; color:#28a745; text-align:center; font-size:1.1rem;'>
+            padding:6px 8px; color:#28a745; text-align:center; font-size:1.1rem;'>
   ✓
 </div>""", unsafe_allow_html=True)
-
-                st.markdown("<hr style='margin:4px 0; border-color:#f0f0f0;'>", unsafe_allow_html=True)
 
                 st.markdown("<hr style='margin:4px 0; border-color:#f0f0f0;'>", unsafe_allow_html=True)
 
@@ -329,22 +317,22 @@ with tab_next:
     next_data = load_json("next_delivery.json", {"items": {}})
     items_nd  = next_data.get("items", {})
 
-    col_nd1, col_nd2 = st.columns(2)
-    with col_nd1:
-        st.markdown("**通常翌納**")
-    with col_nd2:
-        st.markdown("**イベント翌納**")
+    # ヘッダー
+    hnd1, hnd2, hnd3 = st.columns([4, 2, 2])
+    hnd1.caption("商品名")
+    hnd2.caption("通常翌納")
+    hnd3.caption("イベント翌納")
+    st.markdown("<hr style='margin:2px 0 8px;'>", unsafe_allow_html=True)
 
-    changed = False
     for p in products:
         name = p["name"]
         std  = p.get("standards", {})
         if std.get("default") is None:
-            continue  # 定数なし商品はスキップ
+            continue
 
         col1, col2, col3 = st.columns([4, 2, 2])
         with col1:
-            st.write(name)
+            st.markdown(f"**{name}**")
         with col2:
             v_normal = st.number_input(
                 "通常", min_value=0,
