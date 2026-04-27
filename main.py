@@ -16,7 +16,7 @@ init_default_users()
 # サイドバー最上部にロゴ
 _logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "COCO-LOGO_20190127120302.png")
 if os.path.exists(_logo_path):
-    st.logo(_logo_path, link="/")
+    st.logo(_logo_path)
 
 if "user" not in st.session_state:
     st.session_state.user = None
