@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
-from utils import apply_theme, init_default_users, sidebar_user, ROLE_LABELS
+from utils import apply_theme, init_default_users, sidebar_user, ROLE_LABELS, get_user_by_username
 
 st.set_page_config(
     page_title="CoCo壱番屋 スタッフアプリ",
@@ -47,6 +47,19 @@ if os.path.exists(_logo_path):
 
 if "user" not in st.session_state:
     st.session_state.user = None
+
+# Cookie からログイン状態を復元
+try:
+    import extra_streamlit_components as stx
+    _cm = stx.CookieManager(key="main_cm")
+    if st.session_state.user is None:
+        _saved = _cm.get("coco_login")
+        if _saved:
+            _u = get_user_by_username(_saved)
+            if _u:
+                st.session_state.user = _u
+except Exception:
+    pass
 
 if st.session_state.user is None:
     pg = st.navigation(

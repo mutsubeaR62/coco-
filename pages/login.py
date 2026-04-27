@@ -2,6 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 import base64
+from datetime import datetime, timedelta
 from utils import (apply_theme, login_user, award_stamps, show_new_stamps,
                    add_user, get_secret_question, verify_secret_answer,
                    reset_password, SECRET_QUESTIONS, get_all_users, ROOT_DIR)
@@ -67,6 +68,13 @@ with col:
                 user = login_user(username, password)
                 if user:
                     st.session_state.user = user
+                    try:
+                        import extra_streamlit_components as stx
+                        _cm = stx.CookieManager(key="login_cm")
+                        _cm.set("coco_login", username,
+                                expires_at=datetime.now() + timedelta(days=30))
+                    except Exception:
+                        pass
                     _, new_stamps = award_stamps(username)
                     show_new_stamps(new_stamps)
                     st.rerun()

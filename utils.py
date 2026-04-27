@@ -302,6 +302,12 @@ def login_user(username, password):
 def get_all_users():
     return load_json("users.json", {"users": []}).get("users", [])
 
+def get_user_by_username(username):
+    for u in get_all_users():
+        if u["username"] == username:
+            return u
+    return None
+
 SECRET_QUESTIONS = [
     "子供の頃のニックネームは？",
     "小学校の名前は？",
@@ -483,6 +489,12 @@ section[data-testid="stSidebar"] .stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
     if st.sidebar.button("🚪 ログアウト", use_container_width=True):
+        try:
+            import extra_streamlit_components as stx
+            cm = stx.CookieManager(key="logout_cm")
+            cm.delete("coco_login")
+        except Exception:
+            pass
         st.session_state.user = None
         st.rerun()
 
