@@ -138,33 +138,6 @@ with tab_order:
         next_delivery_data = {name: v.get("normal", 0) for name, v in nd.items()}
         st.info("📬 **金曜発注モード** — 発注数 ＝ 金曜定数 − (現在庫 ＋ 木曜翌納数)　※「翌日納品」タブで木曜翌納数を先に入力してください。")
 
-    # ─ 凡例 ─
-    st.markdown("""
-<div style='display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 4px; align-items:center;'>
-  <span style='background:#fff3e0; border:2px solid #e85d04; border-radius:6px;
-               padding:2px 10px; font-weight:700; color:#e85d04; font-size:0.85rem;'>
-    数字 → 発注サイトに入力する数
-  </span>
-  <span style='background:#f0faf0; border:1px solid #28a745; border-radius:6px;
-               padding:2px 10px; color:#28a745; font-size:0.85rem; font-weight:600;'>
-    ✓ → 発注不要
-  </span>
-  <span style='color:#aaa; font-size:0.85rem;'>— → 定数なし</span>
-</div>
-""", unsafe_allow_html=True)
-
-    st.divider()
-
-    # ─ ヘッダー行（スマホでは省略） ─
-    hcol1, hcol2, hcol3 = st.columns([4, 2, 3])
-    with hcol1: st.caption("商品名 / 定数")
-    with hcol2: st.caption("現在庫")
-    with hcol3:
-        st.markdown("<span style='color:#e85d04; font-weight:700; font-size:0.9rem;'>👉 発注数</span>",
-                    unsafe_allow_html=True)
-    st.markdown("<hr style='margin:2px 0 8px; border-color:#e85d04; border-width:2px;'>",
-                unsafe_allow_html=True)
-
     # ─ 商品フィルタリング ─
     filtered = [
         p for p in products
@@ -172,47 +145,113 @@ with tab_order:
         and search.lower() in p["name"].lower()
     ]
 
+    # 発注必要リストを事前計算（右列パネル用）
+    need_order = []
+    for p in filtered:
+        stock    = st.session_state.stock_state.get(p["name"], 0)
+        std      = p.get("standards", {}).get(day_key)
+        next_del = next_delivery_data.get(p["name"], 0) if day_key == "friday" else 0
+        qty      = calc_order(std, stock, next_del)
+        if qty and qty > 0:
+            need_order.append((p, qty))
+
     if not filtered:
         st.info("条件に一致する商品がありません。")
     else:
-        # 発注必要な商品カウント
-        need_order = []
-        for p in filtered:
-            stock    = st.session_state.stock_state.get(p["name"], 0)
-            std      = p.get("standards", {}).get(day_key)
-            next_del = next_delivery_data.get(p["name"], 0) if day_key == "friday" else 0
-            qty      = calc_order(std, stock, next_del)
-            if qty and qty > 0:
-                need_order.append((p, qty))
+        # ─ 2カラムレイアウト: 左=在庫入力、右=発注リスト ─────
+        col_left, col_right = st.columns([3, 2], gap="large")
 
-        if need_order:
-            st.markdown(f"**⚠️ 発注が必要な商品: {len(need_order)}件**")
-        else:
-            st.success("✅ 発注が必要な商品はありません")
+        # ══ 右列: 発注が必要なものだけ一覧 ══════════════════════
+        with col_right:
+            st.markdown("""
+<style>
+.order-panel {
+    background: #fff8f0;
+    border: 2px solid #e85d04;
+    border-radius: 12px;
+    padding: 14px 16px;
+    position: sticky;
+    top: 60px;
+}
+.order-panel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #ffe0c0;
+    font-size: 0.92rem;
+}
+.order-panel-item:last-child { border-bottom: none; }
+.order-qty {
+    background: #e85d04;
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.1rem;
+    min-width: 36px;
+    text-align: center;
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+</style>
+""", unsafe_allow_html=True)
 
-        # ─ 商品ごとに表示 ─
-        for p in filtered:
-            name     = p["name"]
-            note     = p.get("note", "")
-            rare     = p.get("rare", False)
-            std      = p.get("standards", {}).get(day_key)
-            stock    = st.session_state.stock_state.get(name, 0)
-            next_del = next_delivery_data.get(name, 0) if day_key == "friday" else 0
-            order    = calc_order(std, stock, next_del)
+            if need_order:
+                items_html = "".join(
+                    f"<div class='order-panel-item'>"
+                    f"<span>{'🌟 ' if p.get('rare') else ''}{p['name']}</span>"
+                    f"<span class='order-qty'>{qty}</span>"
+                    f"</div>"
+                    for p, qty in need_order
+                )
+                st.markdown(
+                    f"<div class='order-panel'>"
+                    f"<div style='font-weight:700;color:#e85d04;margin-bottom:10px;font-size:0.95rem;'>"
+                    f"⚠️ 発注が必要な商品（{len(need_order)}件）</div>"
+                    f"{items_html}"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    "<div class='order-panel' style='border-color:#28a745;background:#f0faf0;'>"
+                    "<div style='color:#28a745;font-weight:700;text-align:center;padding:8px 0;'>"
+                    "✅ 発注が必要な商品はありません</div></div>",
+                    unsafe_allow_html=True,
+                )
 
-            with st.container():
-                col_name, col_input, col_order = st.columns([4, 2, 3])
+        # ══ 左列: 在庫入力リスト ══════════════════════════════
+        with col_left:
+            st.markdown(
+                "<div style='display:flex;gap:0;margin-bottom:4px;'>"
+                "<span style='flex:4;font-size:0.8rem;color:#888;'>商品名 / 定数</span>"
+                "<span style='flex:2;font-size:0.8rem;color:#888;text-align:center;'>現在庫</span>"
+                "<span style='flex:2;font-size:0.8rem;color:#e85d04;font-weight:700;text-align:center;'>発注数</span>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown("<hr style='margin:2px 0 8px; border-color:#e85d04; border-width:2px;'>",
+                        unsafe_allow_html=True)
+
+            for p in filtered:
+                name     = p["name"]
+                note     = p.get("note", "")
+                rare     = p.get("rare", False)
+                std      = p.get("standards", {}).get(day_key)
+                stock    = st.session_state.stock_state.get(name, 0)
+                next_del = next_delivery_data.get(name, 0) if day_key == "friday" else 0
+                order    = calc_order(std, stock, next_del)
+
+                col_name, col_input, col_order = st.columns([4, 2, 2])
 
                 with col_name:
                     badge = "🌟 " if rare else ""
                     st.markdown(f"**{badge}{name}**")
-                    # 定数・木曜翌納をサブテキストで表示
                     std_txt = f"定数: {std}" if std is not None else "定数: —"
                     if day_key == "friday" and next_del > 0:
                         std_txt += f"　木納: +{next_del}"
                     st.caption(std_txt)
                     if note:
-                        st.caption(f"📌 {note[:40]}{'…' if len(note) > 40 else ''}")
+                        st.caption(f"📌 {note[:30]}{'…' if len(note) > 30 else ''}")
 
                 with col_input:
                     new_stock = st.number_input(
@@ -225,23 +264,25 @@ with tab_order:
 
                 with col_order:
                     if order is None:
-                        st.markdown("<div style='color:#ccc; padding-top:6px; text-align:center;'>—</div>",
+                        st.markdown("<div style='color:#ccc;padding-top:6px;text-align:center;'>—</div>",
                                     unsafe_allow_html=True)
                     elif order > 0:
-                        st.markdown(f"""
-<div style='background:#fff3e0; border:2px solid #e85d04; border-radius:8px;
-            padding:4px 8px; font-size:1.5rem; font-weight:900;
-            color:#e85d04; text-align:center; letter-spacing:1px;'>
-  {order}
-</div>""", unsafe_allow_html=True)
+                        st.markdown(
+                            f"<div style='background:#fff3e0;border:2px solid #e85d04;"
+                            f"border-radius:8px;padding:4px 4px;font-size:1.4rem;"
+                            f"font-weight:900;color:#e85d04;text-align:center;'>{order}</div>",
+                            unsafe_allow_html=True,
+                        )
                     else:
-                        st.markdown("""
-<div style='background:#f0faf0; border:1px solid #28a745; border-radius:8px;
-            padding:6px 8px; color:#28a745; text-align:center; font-size:1.1rem;'>
-  ✓
-</div>""", unsafe_allow_html=True)
+                        st.markdown(
+                            "<div style='background:#f0faf0;border:1px solid #28a745;"
+                            "border-radius:8px;padding:6px 4px;color:#28a745;"
+                            "text-align:center;font-size:1rem;'>✓</div>",
+                            unsafe_allow_html=True,
+                        )
 
-                st.markdown("<hr style='margin:4px 0; border-color:#f0f0f0;'>", unsafe_allow_html=True)
+                st.markdown("<hr style='margin:4px 0;border-color:#f0f0f0;'>",
+                            unsafe_allow_html=True)
 
     # ─ 発注サマリー＆確定 ─
     st.divider()
