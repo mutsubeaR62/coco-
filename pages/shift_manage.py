@@ -23,14 +23,37 @@ for _h in range(8, 24):
     TIME_OPTS.append(f"{_h:02d}:30")
 
 
-def hour_in_shift(start_str, end_str, hour):
-    """その時間帯にシフトが入っているか（hour列 = hour:00〜hour:59）"""
-    try:
-        sh, sm = map(int, start_str.split(":"))
-        eh, em = map(int, end_str.split(":"))
-        return (sh * 60 + sm) < (hour + 1) * 60 and (eh * 60 + em) > hour * 60
-    except Exception:
-        return False
+def get_periods(si):
+    """シフトデータから periods リストを返す（旧形式 start/end にも対応）"""
+    if "periods" in si and si["periods"]:
+        return si["periods"]
+    s, e = si.get("start", ""), si.get("end", "")
+    if s and e:
+        return [[s, e]]
+    return []
+
+def hour_in_periods(periods, hour):
+    """複数の勤務時間帯のいずれかにその時間が含まれるか"""
+    for period in periods:
+        try:
+            sh, sm = map(int, period[0].split(":"))
+            eh, em = map(int, period[1].split(":"))
+            if (sh * 60 + sm) < (hour + 1) * 60 and (eh * 60 + em) > hour * 60:
+                return True
+        except Exception:
+            pass
+    return False
+
+def calc_labor_hours(periods):
+    total_mins = 0
+    for period in periods:
+        try:
+            sh, sm = map(int, period[0].split(":"))
+            eh, em = map(int, period[1].split(":"))
+            total_mins += (eh * 60 + em) - (sh * 60 + sm)
+        except Exception:
+            pass
+    return total_mins / 60
 
 
 def render_grid(schedule, users_dict):
@@ -44,14 +67,10 @@ def render_grid(schedule, users_dict):
     for uname, si in shifts.items():
         ud = users_dict.get(uname, {})
         wage = float(ud.get("hourly_wage", 1050))
-        try:
-            sh, sm = map(int, si.get("start", "09:00").split(":"))
-            eh, em = map(int, si.get("end", "17:00").split(":"))
-            total_labor += ((eh * 60 + em) - (sh * 60 + sm)) / 60 * wage
-        except Exception:
-            pass
+        periods = get_periods(si)
+        total_labor += calc_labor_hours(periods) * wage
         for h in HOURS:
-            if hour_in_shift(si.get("start", "09:00"), si.get("end", "17:00"), h):
+            if hour_in_periods(periods, h):
                 count_per_hour[h] += 1
 
     ratio = (total_labor / sales_target * 100) if sales_target > 0 else None
@@ -112,9 +131,10 @@ def render_grid(schedule, users_dict):
         emp = get_employee_type(ud)
         cls = "cs" if emp == "seishain" else "cb"
         note = si.get("note", "")
+        periods = get_periods(si)
         tbl += f'<tr><td class="nc">{name}</td><td class="ac">{note}</td>'
         for h in HOURS:
-            if hour_in_shift(si.get("start", "09:00"), si.get("end", "17:00"), h):
+            if hour_in_periods(periods, h):
                 tbl += f'<td class="{cls}"></td>'
             else:
                 tbl += "<td></td>"
@@ -173,33 +193,91 @@ with tab_view:
     st.markdown("#### シフトを追加 / 編集")
 
     user_opts = {u["name"]: u["username"] for u in all_users}
-    sel_name = st.selectbox("スタッフを選択", list(user_opts.keys()), key="add_sel")
+    sel_name  = st.selectbox("スタッフを選択", list(user_opts.keys()), key="add_sel")
     sel_uname = user_opts[sel_name]
-    ex_shift = schedule.get("shifts", {}).get(sel_uname, {})
 
-    ca, cb, cc = st.columns([2, 2, 3])
-    def_s = ex_shift.get("start", "09:00") if ex_shift.get("start") in TIME_OPTS else "09:00"
-    def_e = ex_shift.get("end", "17:00") if ex_shift.get("end") in TIME_OPTS else "17:00"
-    add_start = ca.selectbox("開始時間", TIME_OPTS, index=TIME_OPTS.index(def_s), key="as")
-    add_end   = cb.selectbox("終了時間", TIME_OPTS, index=TIME_OPTS.index(def_e), key="ae")
-    add_note  = cc.text_input("備考", value=ex_shift.get("note", ""),
-                               placeholder="例: 22時30分まで願い", key="an")
+    # 現在のシフトデータ取得（常に最新）
+    sc_now    = get_shift_schedule(date_str)
+    ex_shift  = sc_now.get("shifts", {}).get(sel_uname, {})
+    periods   = get_periods(ex_shift)
+
+    # ── 現在の勤務時間帯 ──────────────────────────────────────
+    if periods:
+        st.markdown("**現在の勤務時間帯**")
+        for i, (ps, pe) in enumerate(periods):
+            c1, c2, c3, c4 = st.columns([2, 2, 2, 1])
+            with c1:
+                ns = st.selectbox("開始", TIME_OPTS,
+                                   index=TIME_OPTS.index(ps) if ps in TIME_OPTS else 0,
+                                   key=f"ps_{sel_uname}_{i}")
+            with c2:
+                ne = st.selectbox("終了", TIME_OPTS,
+                                   index=TIME_OPTS.index(pe) if pe in TIME_OPTS else 0,
+                                   key=f"pe_{sel_uname}_{i}")
+            with c3:
+                if st.button("💾 更新", key=f"upd_p_{sel_uname}_{i}"):
+                    new_p = [p[:] for p in periods]
+                    new_p[i] = [ns, ne]
+                    sc_now["shifts"][sel_uname]["periods"] = new_p
+                    sc_now["shifts"][sel_uname].pop("start", None)
+                    sc_now["shifts"][sel_uname].pop("end", None)
+                    save_shift_schedule(date_str, sc_now)
+                    st.rerun()
+            with c4:
+                if st.button("🗑️", key=f"del_p_{sel_uname}_{i}", help="この時間帯を削除"):
+                    new_p = [p for j, p in enumerate(periods) if j != i]
+                    if new_p:
+                        sc_now["shifts"].setdefault(sel_uname, {})["periods"] = new_p
+                        sc_now["shifts"][sel_uname].pop("start", None)
+                        sc_now["shifts"][sel_uname].pop("end", None)
+                    else:
+                        sc_now.get("shifts", {}).pop(sel_uname, None)
+                    save_shift_schedule(date_str, sc_now)
+                    st.rerun()
+    else:
+        st.caption("まだシフトが登録されていません。")
+
+    # ── 時間帯を追加 ─────────────────────────────────────────
+    st.markdown("**時間帯を追加**")
+    ca, cb, cc = st.columns([2, 2, 2])
+    with ca:
+        add_start = st.selectbox("開始", TIME_OPTS,
+                                  index=TIME_OPTS.index("09:00"), key="add_ps")
+    with cb:
+        add_end = st.selectbox("終了", TIME_OPTS,
+                                index=TIME_OPTS.index("17:00"), key="add_pe")
+    with cc:
+        add_note = st.text_input("備考", value=ex_shift.get("note", ""),
+                                  placeholder="例: 22時30分まで", key="add_note")
 
     col_add, col_del = st.columns(2)
-    if col_add.button("✅ 追加 / 更新", type="primary", key="do_add"):
-        sc = get_shift_schedule(date_str)
-        if "shifts" not in sc:
-            sc["shifts"] = {}
-        sc["shifts"][sel_uname] = {"start": add_start, "end": add_end, "note": add_note}
-        save_shift_schedule(date_str, sc)
-        st.success(f"{sel_name} のシフトを保存しました。")
+    if col_add.button("＋ 追加", type="primary", key="do_add"):
+        sc_now2 = get_shift_schedule(date_str)
+        if "shifts" not in sc_now2:
+            sc_now2["shifts"] = {}
+        ex2 = sc_now2["shifts"].get(sel_uname, {})
+        new_p = get_periods(ex2) + [[add_start, add_end]]
+        sc_now2["shifts"][sel_uname] = {
+            "periods": new_p,
+            "note": add_note,
+        }
+        save_shift_schedule(date_str, sc_now2)
+        st.success(f"✅ {sel_name} に {add_start}〜{add_end} を追加しました。")
         st.rerun()
 
-    if col_del.button("🗑️ このスタッフを削除", key="do_del"):
-        sc = get_shift_schedule(date_str)
-        sc.get("shifts", {}).pop(sel_uname, None)
-        save_shift_schedule(date_str, sc)
+    if col_del.button("🗑️ このスタッフをシフトから削除", key="do_del"):
+        sc_now2 = get_shift_schedule(date_str)
+        sc_now2.get("shifts", {}).pop(sel_uname, None)
+        save_shift_schedule(date_str, sc_now2)
         st.warning(f"{sel_name} のシフトを削除しました。")
+        st.rerun()
+
+    # 備考だけ更新するボタン
+    if periods and st.button("📝 備考を保存", key="save_note"):
+        sc_now2 = get_shift_schedule(date_str)
+        sc_now2["shifts"].setdefault(sel_uname, {})["note"] = add_note
+        save_shift_schedule(date_str, sc_now2)
+        st.success("備考を保存しました。")
         st.rerun()
 
 # ─── 申請管理 ──────────────────────────────────────────────────
@@ -256,9 +334,8 @@ with tab_req:
                             if "shifts" not in sc:
                                 sc["shifts"] = {}
                             sc["shifts"][uname] = {
-                                "start": e.get("start", "09:00"),
-                                "end":   e.get("end", "17:00"),
-                                "note":  e.get("note", ""),
+                                "periods": [[e.get("start", "09:00"), e.get("end", "17:00")]],
+                                "note":    e.get("note", ""),
                             }
                             save_shift_schedule(dk, sc)
                             applied += 1
