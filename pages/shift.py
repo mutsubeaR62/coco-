@@ -49,79 +49,100 @@ with tab_view:
     all_users_v  = get_all_users()
     users_dict_v = {u["username"]: u for u in all_users_v}
 
-    sel_date_v = st.date_input("日付を選択", value=today, key="view_date_staff")
-    date_str_v = sel_date_v.strftime("%Y-%m-%d")
-    wd_v  = WEEKDAY_JP[sel_date_v.weekday()]
-    dc_v  = "color:#dc3545;" if sel_date_v.weekday() == 6 else (
-            "color:#1e6ab5;" if sel_date_v.weekday() == 5 else "")
-    st.markdown(
-        f"<h4 style='{dc_v}'>{sel_date_v.year}年{sel_date_v.month}月"
-        f"{sel_date_v.day}日（{wd_v}）</h4>",
-        unsafe_allow_html=True,
+    # 月選択
+    month_opts_v = []
+    for i in range(-1, 4):
+        d = (today.replace(day=1) + timedelta(days=32 * i)).replace(day=1)
+        month_opts_v.append(d.strftime("%Y-%m"))
+    sel_month_v = st.selectbox(
+        "月を選択", month_opts_v, index=1,
+        format_func=lambda m: f"{m[:4]}年{int(m[5:7])}月",
+        key="view_month_staff",
     )
+    y_v, m_v = int(sel_month_v[:4]), int(sel_month_v[5:7])
+    num_days_v = calendar.monthrange(y_v, m_v)[1]
 
-    sc_v     = get_shift_schedule(date_str_v)
-    shifts_v = sc_v.get("shifts", {})
+    def _get_pds(si):
+        if "periods" in si and si["periods"]:
+            return si["periods"]
+        s, e = si.get("start", ""), si.get("end", "")
+        return [[s, e]] if s and e else []
 
-    if not shifts_v:
-        st.info("この日の確定シフトはまだ公開されていません。")
-    else:
-        def _get_pds(si):
-            if "periods" in si and si["periods"]:
-                return si["periods"]
-            s, e = si.get("start", ""), si.get("end", "")
-            return [[s, e]] if s and e else []
+    def _in_pds(pds, h):
+        for p in pds:
+            try:
+                sh, sm = map(int, p[0].split(":"))
+                eh, em = map(int, p[1].split(":"))
+                if (sh * 60 + sm) < (h + 1) * 60 and (eh * 60 + em) > h * 60:
+                    return True
+            except Exception:
+                pass
+        return False
 
-        def _in_pds(pds, h):
-            for p in pds:
-                try:
-                    sh, sm = map(int, p[0].split(":"))
-                    eh, em = map(int, p[1].split(":"))
-                    if (sh * 60 + sm) < (h + 1) * 60 and (eh * 60 + em) > h * 60:
-                        return True
-                except Exception:
-                    pass
-            return False
-
-        sorted_v = sorted(
-            shifts_v.items(),
-            key=lambda x: (
-                0 if get_employee_type(users_dict_v.get(x[0], {})) == "seishain" else 1,
-                users_dict_v.get(x[0], {}).get("name", x[0]),
-            ),
-        )
-
-        tbl_v = """
+    # 1か月分を一気にHTML生成
+    html_v = """
 <style>
-.stbl2{border-collapse:collapse;font-size:12px;width:100%;}
-.stbl2 th,.stbl2 td{border:1px solid #ddd;padding:4px 3px;text-align:center;white-space:nowrap;}
-.stbl2 .nc{text-align:left;min-width:80px;font-weight:600;background:#fafafa;}
-.stbl2 .ac{text-align:left;min-width:100px;font-size:11px;color:#555;background:#fafafa;}
-.stbl2 thead th{background:#f0f0f0;font-weight:700;}
-.cb2{background:#5b4b97!important;}
-.cs2{background:#1e6ab5!important;}
+.ms-wrap { margin-bottom: 18px; }
+.ms-hdr  { font-size: 1rem; font-weight: 700; padding: 6px 12px;
+           background: #f8f9fa; border-left: 4px solid #e85d04;
+           border-radius: 6px 6px 0 0; }
+.ms-sun  { border-left-color: #dc3545; color: #dc3545; }
+.ms-sat  { border-left-color: #1e6ab5; color: #1e6ab5; }
+.ms-none { font-size: 0.82rem; color: #aaa; padding: 4px 12px 8px;
+           background: #fafafa; border-radius: 0 0 6px 6px; }
+.stbl3   { border-collapse: collapse; font-size: 12px; width: 100%; }
+.stbl3 th, .stbl3 td { border: 1px solid #ddd; padding: 4px 3px;
+                        text-align: center; white-space: nowrap; }
+.stbl3 .nc { text-align: left; min-width: 80px; font-weight: 600; background: #fafafa; }
+.stbl3 .ac { text-align: left; min-width: 90px; font-size: 11px; color: #555; background: #fafafa; }
+.stbl3 thead th { background: #f0f0f0; font-weight: 700; }
+.cb3 { background: #5b4b97 !important; }
+.cs3 { background: #1e6ab5 !important; }
 </style>
-<div style="overflow-x:auto;">
-<table class="stbl2"><thead><tr>
-<th class="nc">名前</th><th class="ac">備考</th>
 """
-        for h in HOURS:
-            tbl_v += f"<th>{h}</th>"
-        tbl_v += "</tr></thead><tbody>"
+    for day_num in range(1, num_days_v + 1):
+        d  = date(y_v, m_v, day_num)
+        ds = d.strftime("%Y-%m-%d")
+        wd = WEEKDAY_JP[d.weekday()]
+        hdr_cls = "ms-hdr ms-sun" if d.weekday() == 6 else (
+                  "ms-hdr ms-sat" if d.weekday() == 5 else "ms-hdr")
 
-        for uname, si in sorted_v:
-            ud   = users_dict_v.get(uname, {})
-            name = ud.get("name", uname)
-            emp  = get_employee_type(ud)
-            cls  = "cs2" if emp == "seishain" else "cb2"
-            note = si.get("note", "")
-            pds  = _get_pds(si)
-            tbl_v += f'<tr><td class="nc">{name}</td><td class="ac">{note}</td>'
+        sc_day   = get_shift_schedule(ds)
+        shifts_d = sc_day.get("shifts", {})
+
+        html_v += f"<div class='ms-wrap'>"
+        html_v += f"<div class='{hdr_cls}'>{m_v}/{day_num}（{wd}）</div>"
+
+        if not shifts_d:
+            html_v += "<div class='ms-none'>— 未登録 —</div>"
+        else:
+            sorted_d = sorted(
+                shifts_d.items(),
+                key=lambda x: (
+                    0 if get_employee_type(users_dict_v.get(x[0], {})) == "seishain" else 1,
+                    users_dict_v.get(x[0], {}).get("name", x[0]),
+                ),
+            )
+            html_v += "<div style='overflow-x:auto;'><table class='stbl3'><thead><tr>"
+            html_v += "<th class='nc'>名前</th><th class='ac'>備考</th>"
             for h in HOURS:
-                tbl_v += f'<td class="{cls}"></td>' if _in_pds(pds, h) else "<td></td>"
-            tbl_v += "</tr>"
-        tbl_v += "</tbody></table></div>"
-        st.markdown(tbl_v, unsafe_allow_html=True)
+                html_v += f"<th>{h}</th>"
+            html_v += "</tr></thead><tbody>"
+            for uname, si in sorted_d:
+                ud   = users_dict_v.get(uname, {})
+                name = ud.get("name", uname)
+                emp  = get_employee_type(ud)
+                cls  = "cs3" if emp == "seishain" else "cb3"
+                note = si.get("note", "")
+                pds  = _get_pds(si)
+                html_v += f'<tr><td class="nc">{name}</td><td class="ac">{note}</td>'
+                for h in HOURS:
+                    html_v += f'<td class="{cls}"></td>' if _in_pds(pds, h) else "<td></td>"
+                html_v += "</tr>"
+            html_v += "</tbody></table></div>"
+        html_v += "</div>"
+
+    st.markdown(html_v, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════
 # TAB: シフト申請

@@ -177,114 +177,150 @@ tab_view, tab_req, tab_cfg = st.tabs(["📊 シフト確認", "📥 申請管理
 all_users = get_all_users()
 users_dict = {u["username"]: u for u in all_users}
 
-# ─── シフト確認 ────────────────────────────────────────────────
+# ─── シフト確認 & 編集 ────────────────────────────────────────
 with tab_view:
-    sel_date = st.date_input("日付を選択", value=today, key="view_date")
-    date_str = sel_date.strftime("%Y-%m-%d")
-    wd = WEEKDAY_JP[sel_date.weekday()]
-    day_color = "color:#dc3545;" if sel_date.weekday() == 6 else (
-        "color:#1e6ab5;" if sel_date.weekday() == 5 else "")
-    st.markdown(
-        f"<h4 style='{day_color}'>{sel_date.year}年{sel_date.month}月{sel_date.day}日（{wd}）</h4>",
-        unsafe_allow_html=True,
+    import pandas as pd
+
+    # 月選択
+    month_opts_m = []
+    for i in range(-1, 4):
+        d = (today.replace(day=1) + timedelta(days=32 * i)).replace(day=1)
+        month_opts_m.append(d.strftime("%Y-%m"))
+    sel_month_m = st.selectbox(
+        "月を選択", month_opts_m, index=1,
+        format_func=lambda m: f"{m[:4]}年{int(m[5:7])}月",
+        key="view_month_mgr",
     )
+    y_m, m_m = int(sel_month_m[:4]), int(sel_month_m[5:7])
+    num_days_m = calendar.monthrange(y_m, m_m)[1]
 
-    schedule = get_shift_schedule(date_str)
+    all_requests_m = get_all_shift_requests(sel_month_m)
 
-    # 売上目標・最低人員の設定
-    with st.expander("⚙️ この日の設定", expanded=False):
-        cs1, cs2 = st.columns(2)
-        new_target = cs1.number_input("売上目標 (¥)", value=int(schedule.get("sales_target", 0)),
-                                       step=1000, min_value=0, key="tgt")
-        new_min = cs2.number_input("最低必要人員（人）", value=int(schedule.get("min_staff", 3)),
-                                    step=1, min_value=1, key="minst")
-        if st.button("保存", key="save_cfg"):
-            schedule["sales_target"] = new_target
-            schedule["min_staff"] = new_min
-            save_shift_schedule(date_str, schedule)
-            st.success("設定を保存しました")
-            st.rerun()
-
-    render_grid(schedule, users_dict)
+    # 月全体の人件費サマリ
+    total_labor_m = 0.0
+    for day_num in range(1, num_days_m + 1):
+        sc_tmp = get_shift_schedule(date(y_m, m_m, day_num).strftime("%Y-%m-%d"))
+        for si in sc_tmp.get("shifts", {}).values():
+            ud_tmp = {}
+            for uname_tmp, si_tmp in sc_tmp.get("shifts", {}).items():
+                if si_tmp is si:
+                    ud_tmp = users_dict.get(uname_tmp, {})
+            wage = float(ud_tmp.get("hourly_wage", 1050))
+            total_labor_m += calc_labor_hours(get_periods(si)) * wage
+    st.metric("今月の人件費合計（概算）", f"¥{total_labor_m:,.0f}")
 
     st.divider()
 
-    # ── 編集モード（グリッド直接編集）───────────────────────────
-    if st.toggle("✏️ シフトを編集する", key="edit_toggle"):
-        import pandas as pd
+    # 1か月分を縦に表示（各日ごとにグリッド＋編集）
+    for day_num in range(1, num_days_m + 1):
+        d   = date(y_m, m_m, day_num)
+        ds  = d.strftime("%Y-%m-%d")
+        wd  = WEEKDAY_JP[d.weekday()]
+        dc  = "color:#dc3545;" if d.weekday() == 6 else (
+              "color:#1e6ab5;" if d.weekday() == 5 else "color:#333;")
 
-        month_str   = date_str[:7]
-        all_requests = get_all_shift_requests(month_str)
+        schedule_d = get_shift_schedule(ds)
+        shifts_d   = schedule_d.get("shifts", {})
 
-        # この日に出勤申請 or 既にシフト登録済みのスタッフを集める
-        scheduled = schedule.get("shifts", {})
-        req_for_day = {
-            uname: req["entries"][date_str]
-            for uname, req in all_requests.items()
-            if date_str in req.get("entries", {})
-            and req["entries"][date_str].get("type") == "work"
-        }
-        target_unames = sorted(
-            set(scheduled.keys()) | set(req_for_day.keys()),
-            key=lambda u: (
-                0 if get_employee_type(users_dict.get(u, {})) == "seishain" else 1,
-                users_dict.get(u, {}).get("name", u),
-            ),
+        # 日付ヘッダー
+        st.markdown(
+            f"<div style='font-size:1.05rem;font-weight:700;{dc}"
+            f"padding:6px 0 2px;border-bottom:2px solid #eee;margin-top:12px;'>"
+            f"{m_m}/{day_num}（{wd}）</div>",
+            unsafe_allow_html=True,
         )
 
-        if not target_unames:
-            st.info("この日に申請・登録済みのスタッフがいません。")
+        if shifts_d:
+            render_grid(schedule_d, users_dict)
         else:
-            # DataFrame 組み立て（行=スタッフ名、列=時間帯+備考）
-            rows = {}
-            name_to_uname = {}
-            for uname in target_unames:
-                ud   = users_dict.get(uname, {})
-                name = ud.get("name", uname)
-                name_to_uname[name] = uname
-                si   = scheduled.get(uname, {})
-                periods = get_periods(si)
-                # 未登録なら申請時間をデフォルトに
-                if not periods and uname in req_for_day:
-                    e = req_for_day[uname]
-                    periods = [[e.get("start", "09:00"), e.get("end", "17:00")]]
-                row = {str(h): hour_in_periods(periods, h) for h in HOURS}
-                row["備考"] = si.get("note", "") or req_for_day.get(uname, {}).get("note", "")
-                rows[name] = row
+            st.caption("— 未登録 —")
 
-            df = pd.DataFrame(rows).T
-            df.index.name = "名前"
+        # 編集エリア（expander で折りたたみ）
+        with st.expander(f"✏️ {m_m}/{day_num} を編集"):
+            # 売上目標・最低人員
+            cs1, cs2 = st.columns(2)
+            new_target = cs1.number_input("売上目標 (¥)",
+                                           value=int(schedule_d.get("sales_target", 0)),
+                                           step=1000, min_value=0, key=f"tgt_{ds}")
+            new_min    = cs2.number_input("最低必要人員",
+                                           value=int(schedule_d.get("min_staff", 3)),
+                                           step=1, min_value=1, key=f"minst_{ds}")
+            if st.button("設定保存", key=f"cfg_{ds}"):
+                schedule_d["sales_target"] = new_target
+                schedule_d["min_staff"]    = new_min
+                save_shift_schedule(ds, schedule_d)
+                st.success("保存しました")
+                st.rerun()
 
-            col_cfg = {str(h): st.column_config.CheckboxColumn(
-                f"{h}", default=False, width="small") for h in HOURS}
-            col_cfg["備考"] = st.column_config.TextColumn("備考", width="medium")
+            st.divider()
 
-            st.caption("✅ チェック = 勤務、外すと休憩になります。編集後「保存」を押してください。")
-            edited = st.data_editor(
-                df, column_config=col_cfg,
-                use_container_width=True, key="shift_grid_editor"
+            # グリッド編集
+            req_for_day = {
+                uname: req["entries"][ds]
+                for uname, req in all_requests_m.items()
+                if ds in req.get("entries", {})
+                and req["entries"][ds].get("type") == "work"
+            }
+            target_unames = sorted(
+                set(shifts_d.keys()) | set(req_for_day.keys()),
+                key=lambda u: (
+                    0 if get_employee_type(users_dict.get(u, {})) == "seishain" else 1,
+                    users_dict.get(u, {}).get("name", u),
+                ),
             )
 
-            if st.button("💾 シフトを保存", type="primary", key="grid_save"):
-                sc_save = get_shift_schedule(date_str)
-                if "shifts" not in sc_save:
-                    sc_save["shifts"] = {}
-                for name, row in edited.iterrows():
-                    uname = name_to_uname.get(name)
-                    if not uname:
-                        continue
-                    hour_bools = {h: bool(row[str(h)]) for h in HOURS}
-                    new_periods = hour_bools_to_periods(hour_bools)
-                    if new_periods:
-                        sc_save["shifts"][uname] = {
-                            "periods": new_periods,
-                            "note": str(row.get("備考", "") or ""),
-                        }
-                    else:
-                        sc_save["shifts"].pop(uname, None)
-                save_shift_schedule(date_str, sc_save)
-                st.success("✅ シフトを保存しました！")
-                st.rerun()
+            if not target_unames:
+                st.caption("申請・登録済みのスタッフがいません。")
+            else:
+                rows = {}
+                name_to_uname = {}
+                for uname in target_unames:
+                    ud   = users_dict.get(uname, {})
+                    name = ud.get("name", uname)
+                    name_to_uname[name] = uname
+                    si   = shifts_d.get(uname, {})
+                    pds  = get_periods(si)
+                    if not pds and uname in req_for_day:
+                        e   = req_for_day[uname]
+                        pds = [[e.get("start", "09:00"), e.get("end", "17:00")]]
+                    row = {str(h): hour_in_periods(pds, h) for h in HOURS}
+                    row["備考"] = si.get("note", "") or req_for_day.get(uname, {}).get("note", "")
+                    rows[name] = row
+
+                df = pd.DataFrame(rows).T
+                df.index.name = "名前"
+
+                col_cfg = {str(h): st.column_config.CheckboxColumn(
+                    f"{h}", default=False, width="small") for h in HOURS}
+                col_cfg["備考"] = st.column_config.TextColumn("備考", width="medium")
+
+                st.caption("チェックを外すと休憩になります。")
+                edited = st.data_editor(
+                    df, column_config=col_cfg,
+                    use_container_width=True, key=f"grid_{ds}"
+                )
+
+                if st.button("💾 シフトを保存", type="primary", key=f"save_{ds}"):
+                    sc_save = get_shift_schedule(ds)
+                    sc_save.setdefault("shifts", {})
+                    for name, row in edited.iterrows():
+                        uname = name_to_uname.get(name)
+                        if not uname:
+                            continue
+                        hour_bools = {h: bool(row[str(h)]) for h in HOURS}
+                        new_pds = hour_bools_to_periods(hour_bools)
+                        if new_pds:
+                            sc_save["shifts"][uname] = {
+                                "periods": new_pds,
+                                "note": str(row.get("備考", "") or ""),
+                            }
+                        else:
+                            sc_save["shifts"].pop(uname, None)
+                    sc_save["sales_target"] = new_target
+                    sc_save["min_staff"]    = new_min
+                    save_shift_schedule(ds, sc_save)
+                    st.success("✅ 保存しました！")
+                    st.rerun()
 
 # ─── 申請管理 ──────────────────────────────────────────────────
 with tab_req:
