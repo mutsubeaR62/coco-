@@ -232,26 +232,6 @@ with tab_order:
             st.markdown("<hr style='margin:2px 0 8px; border-color:#e85d04; border-width:2px;'>",
                         unsafe_allow_html=True)
 
-            st.markdown("""
-<style>
-.stock-btn button {
-    font-size: 1.3rem !important;
-    font-weight: 900 !important;
-    padding: 4px 0 !important;
-    min-height: 44px !important;
-    border-radius: 8px !important;
-    width: 100% !important;
-}
-.stock-count {
-    font-size: 1.6rem;
-    font-weight: 900;
-    text-align: center;
-    padding: 6px 0;
-    color: #333;
-}
-</style>
-""", unsafe_allow_html=True)
-
             for p in filtered:
                 name     = p["name"]
                 note     = p.get("note", "")
@@ -261,7 +241,7 @@ with tab_order:
                 next_del = next_delivery_data.get(name, 0) if day_key == "friday" else 0
                 order    = calc_order(std, stock, next_del)
 
-                col_name, col_minus, col_count, col_plus, col_order = st.columns([4, 1, 1, 1, 2])
+                col_name, col_input, col_order = st.columns([4, 2, 2])
 
                 with col_name:
                     badge = "🌟 " if rare else ""
@@ -273,23 +253,15 @@ with tab_order:
                     if note:
                         st.caption(f"📌 {note[:30]}{'…' if len(note) > 30 else ''}")
 
-                with col_minus:
-                    st.markdown("<div class='stock-btn'>", unsafe_allow_html=True)
-                    if st.button("－", key=f"minus_{name}", use_container_width=True):
-                        st.session_state.stock_state[name] = max(0, stock - 1)
+                with col_input:
+                    new_stock = st.selectbox(
+                        "在庫", list(range(0, 51)),
+                        index=min(stock, 50),
+                        key=f"stock_{name}", label_visibility="collapsed"
+                    )
+                    if new_stock != stock:
+                        st.session_state.stock_state[name] = new_stock
                         st.rerun()
-                    st.markdown("</div>", unsafe_allow_html=True)
-
-                with col_count:
-                    st.markdown(f"<div class='stock-count'>{stock}</div>",
-                                unsafe_allow_html=True)
-
-                with col_plus:
-                    st.markdown("<div class='stock-btn'>", unsafe_allow_html=True)
-                    if st.button("＋", key=f"plus_{name}", use_container_width=True):
-                        st.session_state.stock_state[name] = stock + 1
-                        st.rerun()
-                    st.markdown("</div>", unsafe_allow_html=True)
 
                 with col_order:
                     if order is None:

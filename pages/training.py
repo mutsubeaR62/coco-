@@ -2,13 +2,16 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 import random
-from utils import apply_theme, require_login, page_header, get_progress, save_progress, award_stamps, show_new_stamps, STAMPS
+from utils import (apply_theme, require_login, page_header, get_progress, save_progress,
+                   award_stamps, show_new_stamps, STAMPS, load_json, save_json,
+                   get_all_users, ROLE_LABELS)
 
 apply_theme()
 require_login()
 
 user = st.session_state.user
 username = user["username"]
+role = user.get("role", "kenshu")
 
 # ─── 学習データ ───────────────────────────────────────────────
 FLASHCARDS = [
@@ -118,6 +121,105 @@ earned_stamps = set(progress.get("stamps", []))
 
 page_header("🎓 新人研修", "フラッシュカード・クイズ・スタンプで楽しく覚えよう！")
 
+# ══════════════════════════════════════════════════════════════
+# 研修以外のロール → 研修生の進捗管理ビュー
+# ══════════════════════════════════════════════════════════════
+if role != "kenshu":
+    DEFAULT_MILESTONES = [
+        "開店・閉店作業の説明",
+        "接客マナー・言葉遣い",
+        "POSレジ操作",
+        "メニュー・辛さの説明",
+        "厨房作業（盛り付け）",
+        "衛生管理の説明",
+        "クイズ合格（7問以上）",
+        "独り立ちOK",
+    ]
+
+    def get_training_progress():
+        return load_json("training_check.json", {})
+
+    def save_training_progress(data):
+        save_json("training_check.json", data)
+
+    all_users = get_all_users()
+    kenshu_users = [u for u in all_users if u.get("role") == "kenshu"]
+
+    if not kenshu_users:
+        st.info("現在、研修中のメンバーはいません。")
+        st.stop()
+
+    training_data = get_training_progress()
+
+    st.markdown("### 👥 研修生の進捗確認")
+    st.caption("チェックボックスをONにすると自動保存されます。")
+
+    is_mgr = role in ("admin", "daiko")
+
+    for ku in kenshu_users:
+        kun   = ku["username"]
+        kname = ku["name"]
+        prog  = get_progress(kun)
+        quiz_scores = prog.get("quiz_scores", [])
+        cl_done = prog.get("checklist_completions", {})
+        stamps_earned = len(set(prog.get("stamps", [])))
+
+        checks = training_data.get(kun, {})
+        done_count = sum(1 for m in DEFAULT_MILESTONES if checks.get(m, False))
+        pct = int(done_count / len(DEFAULT_MILESTONES) * 100)
+
+        with st.expander(
+            f"🌱 {kname}　　{done_count}/{len(DEFAULT_MILESTONES)} 項目完了 ({pct}%)",
+            expanded=True,
+        ):
+            # 進捗バー
+            st.progress(pct / 100)
+
+            # スタッツ行
+            c1, c2, c3 = st.columns(3)
+            c1.metric("クイズ最高点",
+                      f"{max(quiz_scores)}/10" if quiz_scores else "未受験")
+            c2.metric("チェックリスト完了",
+                      f"{sum(cl_done.values())}回")
+            c3.metric("スタンプ獲得",
+                      f"{stamps_earned}/{len(STAMPS)}")
+
+            st.divider()
+            st.markdown("**研修チェック項目**")
+
+            changed = False
+            new_checks = dict(checks)
+            for milestone in DEFAULT_MILESTONES:
+                cur_val = checks.get(milestone, False)
+                new_val = st.checkbox(
+                    milestone, value=cur_val,
+                    key=f"tr_{kun}_{milestone}",
+                    disabled=not is_mgr,
+                )
+                if new_val != cur_val:
+                    new_checks[milestone] = new_val
+                    changed = True
+
+            if changed:
+                training_data[kun] = new_checks
+                save_training_progress(training_data)
+                st.rerun()
+
+            # 管理者向けメモ欄
+            if is_mgr:
+                memo_key = f"memo_{kun}"
+                cur_memo = training_data.get(memo_key, "")
+                new_memo = st.text_area("📝 メモ（管理者のみ）", value=cur_memo,
+                                        key=f"memo_area_{kun}", height=60)
+                if new_memo != cur_memo:
+                    training_data[memo_key] = new_memo
+                    save_training_progress(training_data)
+
+    st.stop()
+
+# ══════════════════════════════════════════════════════════════
+# 研修ロール → 通常の学習コンテンツ
+# ══════════════════════════════════════════════════════════════
 tab_fc, tab_quiz, tab_stamps = st.tabs(["🃏 フラッシュカード", "❓ クイズ", "🏅 スタンプ帳"])
 
 # ════ フラッシュカード ══════════════════════════════════════════
