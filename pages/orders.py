@@ -144,6 +144,7 @@ with tab_order:
         if (sel_loc == "すべて" or p["location"] == sel_loc)
         and search.lower() in p["name"].lower()
     ]
+    filtered.sort(key=lambda p: p.get("order", 9999))
 
     # 発注必要リストを事前計算（右列パネル用）
     need_order = []
