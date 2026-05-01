@@ -260,7 +260,27 @@ def is_manager(user):
 def _ensure_data():
     os.makedirs(DATA_DIR, exist_ok=True)
 
+@st.cache_resource
+def _get_supabase():
+    try:
+        from supabase import create_client
+        url = st.secrets["supabase"]["url"]
+        key = st.secrets["supabase"]["key"]
+        return create_client(url, key)
+    except Exception:
+        return None
+
 def load_json(filename, default=None):
+    sb = _get_supabase()
+    if sb:
+        try:
+            result = sb.table("json_store").select("data").eq("key", filename).execute()
+            if result.data:
+                return result.data[0]["data"]
+            return default if default is not None else {}
+        except Exception:
+            pass
+    # フォールバック: ローカルファイル
     _ensure_data()
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
@@ -272,6 +292,14 @@ def load_json(filename, default=None):
         return default if default is not None else {}
 
 def save_json(filename, data):
+    sb = _get_supabase()
+    if sb:
+        try:
+            sb.table("json_store").upsert({"key": filename, "data": data}).execute()
+            return
+        except Exception:
+            pass
+    # フォールバック: ローカルファイル
     _ensure_data()
     path = os.path.join(DATA_DIR, filename)
     with open(path, "w", encoding="utf-8") as f:
