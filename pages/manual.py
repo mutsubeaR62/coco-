@@ -226,7 +226,9 @@ def clean_curry_name(filename):
 
 
 def _render_pdf_panel(pdfs, folder, key_prefix):
-    """検索・ボタングリッド・PDF表示の共通UI"""
+    """検索・ボタングリッド・PDF表示の共通UI（PC / スマホ対応）"""
+    is_mobile = st.session_state.get("device", "pc") == "mobile"
+
     if not pdfs:
         st.info("このカテゴリにPDFがありません。")
         return
@@ -259,14 +261,10 @@ def _render_pdf_panel(pdfs, folder, key_prefix):
 div[data-testid="stHorizontalBlock"] > div { min-width: 0; }
 </style>""", unsafe_allow_html=True)
 
-    if sel:
-        left_col, right_col = st.columns([1, 2], gap="medium")
-    else:
-        left_col = st.container()
-        right_col = None
-
-    with left_col:
-        COLS = 2 if sel else 3
+    # ── ボタングリッド ──────────────────────────────────────────
+    if is_mobile:
+        # スマホ: 常に2列、PCレイアウトなし
+        COLS = 2
         for i in range(0, len(filtered), COLS):
             row_files = filtered[i:i + COLS]
             cols = st.columns(COLS)
@@ -282,29 +280,79 @@ div[data-testid="stHorizontalBlock"] > div { min-width: 0; }
                     ):
                         st.session_state[sel_key] = None if is_sel else fname
                         st.rerun()
-
-    if right_col and sel:
-        with right_col:
+        # スマホ: PDF はボタンの下にフル幅で表示
+        if sel:
             cname = clean_curry_name(sel)
-            hc1, hc2 = st.columns([5, 1])
+            st.divider()
+            hc1, hc2 = st.columns([4, 1])
             with hc1:
-                st.markdown(f"### 📄 {cname}")
+                st.markdown(f"**📄 {cname}**")
             with hc2:
                 if st.button("✖ 閉じる", key=f"close_{key_prefix}", use_container_width=True):
                     st.session_state[sel_key] = None
                     st.rerun()
-            embed_pdf(os.path.join(folder, sel))
+            embed_pdf(os.path.join(folder, sel), is_mobile=True)
+    else:
+        # PC: PDF選択時は左右2カラム
+        if sel:
+            left_col, right_col = st.columns([1, 2], gap="medium")
+        else:
+            left_col = st.container()
+            right_col = None
+
+        with left_col:
+            COLS = 2 if sel else 3
+            for i in range(0, len(filtered), COLS):
+                row_files = filtered[i:i + COLS]
+                cols = st.columns(COLS)
+                for col, fname in zip(cols, row_files):
+                    cname  = clean_curry_name(fname)
+                    is_sel = (sel == fname)
+                    with col:
+                        if st.button(
+                            f"✅ {cname}" if is_sel else cname,
+                            key=f"btn_{key_prefix}_{fname}",
+                            use_container_width=True,
+                            type="primary" if is_sel else "secondary",
+                        ):
+                            st.session_state[sel_key] = None if is_sel else fname
+                            st.rerun()
+
+        if right_col and sel:
+            with right_col:
+                cname = clean_curry_name(sel)
+                hc1, hc2 = st.columns([5, 1])
+                with hc1:
+                    st.markdown(f"### 📄 {cname}")
+                with hc2:
+                    if st.button("✖ 閉じる", key=f"close_{key_prefix}", use_container_width=True):
+                        st.session_state[sel_key] = None
+                        st.rerun()
+                embed_pdf(os.path.join(folder, sel), is_mobile=False)
 
 
-def embed_pdf(file_path):
-    """PDFをBase64エンコードしてiframeで表示"""
+def embed_pdf(file_path, is_mobile=False):
+    """PDFをBase64エンコードしてiframeで表示。スマホは別タブリンクも併記"""
     with open(file_path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode("utf-8")
+    data_uri = f"data:application/pdf;base64,{b64}"
+    height = "500px" if is_mobile else "900px"
+
+    if is_mobile:
+        # スマホ: iframeと「別タブで開く」ボタンを両方表示（iOS Safari対策）
+        st.markdown(
+            f'<a href="{data_uri}" target="_blank" style="display:block;text-align:center;'
+            f'background:#e85d04;color:#fff;padding:10px;border-radius:8px;'
+            f'font-weight:700;text-decoration:none;margin-bottom:10px;">'
+            f'📄 PDFを別タブで開く（iPhoneはこちら）</a>',
+            unsafe_allow_html=True,
+        )
+
     iframe_html = f"""
     <iframe
-        src="data:application/pdf;base64,{b64}"
+        src="{data_uri}"
         width="100%"
-        height="900px"
+        height="{height}"
         style="border:1px solid #e0e0e0; border-radius:8px;"
         type="application/pdf">
         <p>PDFの表示に対応していないブラウザです。</p>
