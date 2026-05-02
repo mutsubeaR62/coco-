@@ -231,63 +231,6 @@ def _render_pdf_panel(pdfs, folder, key_prefix):
         st.info("このカテゴリにPDFがありません。")
         return
 
-    st.markdown("""
-<style>
-.pdf-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 8px 0 16px;
-}
-@media (max-width: 640px) {
-    .pdf-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.pdf-tile {
-    background: #f5f6fa;
-    border: 1.5px solid #d8dbe6;
-    border-radius: 10px;
-    padding: 14px 8px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #333;
-    text-align: center;
-    cursor: pointer;
-    line-height: 1.5;
-    word-break: keep-all;
-    transition: all .15s;
-    text-decoration: none;
-    display: block;
-}
-.pdf-tile:hover  { background: #e8ebf5; border-color: #aab; }
-.pdf-tile.sel    { background: #e85d04; color: #fff !important; border-color: #e85d04; }
-.pdf-open-btn {
-    display: block;
-    text-align: center;
-    background: #e85d04;
-    color: #fff !important;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 700;
-    text-decoration: none;
-    margin: 4px 0 8px;
-    font-size: 1rem;
-}
-.pdf-close-btn {
-    display: inline-block;
-    background: #555;
-    color: #fff !important;
-    padding: 6px 16px;
-    border-radius: 6px;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border: none;
-    margin-bottom: 8px;
-}
-</style>
-""", unsafe_allow_html=True)
-
     # 検索
     search_query = st.text_input(
         "🔍 検索",
@@ -305,34 +248,42 @@ def _render_pdf_panel(pdfs, folder, key_prefix):
         st.info("該当するメニューが見つかりません。")
         return
 
-    # 選択状態（query params で管理 → HTML リンクから更新可能）
-    qp_key = f"pdf_{key_prefix}"
-    sel = st.query_params.get(qp_key, "")
-    if sel not in pdfs:
-        sel = ""
+    sel_key = f"sel_{key_prefix}"
+    if sel_key not in st.session_state:
+        st.session_state[sel_key] = None
+    sel = st.session_state[sel_key]
+    if sel and sel not in pdfs:
+        sel = None
+        st.session_state[sel_key] = None
 
-    # ── ボタングリッド（純HTML） ──────────────────────────────
-    tiles_html = '<div class="pdf-grid">'
-    for fname in filtered:
-        cname   = clean_curry_name(fname)
-        is_sel  = (sel == fname)
-        cls     = "pdf-tile sel" if is_sel else "pdf-tile"
-        # 選択済みをクリック → 解除、未選択 → 選択
-        new_qp  = dict(st.query_params)
-        if is_sel:
-            new_qp.pop(qp_key, None)
-        else:
-            new_qp[qp_key] = fname
-        qs = "&".join(f"{k}={v}" for k, v in new_qp.items())
-        href = f"?{qs}" if qs else "?"
-        tiles_html += f'<a href="{href}" class="{cls}">{cname}</a>'
-    tiles_html += '</div>'
-    st.markdown(tiles_html, unsafe_allow_html=True)
+    # ── ボタングリッド（2列固定） ────────────────────────────
+    for i in range(0, len(filtered), 2):
+        row = filtered[i:i + 2]
+        cols = st.columns(2, gap="small")
+        for col, fname in zip(cols, row):
+            cname  = clean_curry_name(fname)
+            is_sel = (sel == fname)
+            with col:
+                if st.button(
+                    ("✅ " if is_sel else "") + cname,
+                    key=f"btn_{key_prefix}_{fname}",
+                    use_container_width=True,
+                    type="primary" if is_sel else "secondary",
+                ):
+                    st.session_state[sel_key] = None if is_sel else fname
+                    st.rerun()
 
     # ── PDF表示（縦積み・フル幅）─────────────────────────────
     if sel:
         cname = clean_curry_name(sel)
-        st.markdown(f"**📄 {cname}**")
+        st.divider()
+        c1, c2 = st.columns([5, 1])
+        with c1:
+            st.markdown(f"**📄 {cname}**")
+        with c2:
+            if st.button("✖", key=f"close_{key_prefix}", use_container_width=True):
+                st.session_state[sel_key] = None
+                st.rerun()
         embed_pdf(os.path.join(folder, sel))
 
 
