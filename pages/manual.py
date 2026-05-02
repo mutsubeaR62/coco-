@@ -226,66 +226,69 @@ def clean_curry_name(filename):
 
 
 def _render_pdf_panel(pdfs, folder, key_prefix):
-    """検索・ボタングリッド・PDF表示（縦積みレイアウト・デバイス共通）"""
+    """検索・ボタングリッド・PDF表示"""
     if not pdfs:
         st.info("このカテゴリにPDFがありません。")
         return
 
-    # CSS: ボタンをレスポンシブグリッドで並べる
     st.markdown("""
 <style>
-.pdf-btn-grid {
+.pdf-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-bottom: 12px;
+    margin: 8px 0 16px;
 }
-@media (max-width: 768px) {
-    .pdf-btn-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 640px) {
+    .pdf-grid { grid-template-columns: repeat(2, 1fr); }
 }
-.pdf-btn {
-    background: #f0f2f6;
-    border: 1px solid #d0d3da;
-    border-radius: 8px;
-    padding: 12px 8px;
-    font-size: 0.9rem;
+.pdf-tile {
+    background: #f5f6fa;
+    border: 1.5px solid #d8dbe6;
+    border-radius: 10px;
+    padding: 14px 8px;
+    font-size: 0.88rem;
     font-weight: 600;
     color: #333;
-    cursor: pointer;
-    width: 100%;
     text-align: center;
-    line-height: 1.4;
-    word-break: break-all;
-    transition: background 0.15s;
+    cursor: pointer;
+    line-height: 1.5;
+    word-break: keep-all;
+    transition: all .15s;
+    text-decoration: none;
+    display: block;
 }
-.pdf-btn:hover  { background: #e0e4ef; }
-.pdf-btn.active { background: #e85d04; color: #fff; border-color: #e85d04; }
-.pdf-viewer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fafafa;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px 8px 0 0;
-    padding: 10px 14px;
-    margin-top: 12px;
-}
-.pdf-viewer-header .title { font-size: 1rem; font-weight: 700; color: #222; }
-.pdf-open-link {
+.pdf-tile:hover  { background: #e8ebf5; border-color: #aab; }
+.pdf-tile.sel    { background: #e85d04; color: #fff !important; border-color: #e85d04; }
+.pdf-open-btn {
     display: block;
     text-align: center;
     background: #e85d04;
     color: #fff !important;
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
-    margin: 8px 0;
-    font-size: 0.95rem;
+    margin: 4px 0 8px;
+    font-size: 1rem;
+}
+.pdf-close-btn {
+    display: inline-block;
+    background: #555;
+    color: #fff !important;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    margin-bottom: 8px;
 }
 </style>
 """, unsafe_allow_html=True)
 
+    # 検索
     search_query = st.text_input(
         "🔍 検索",
         placeholder="例: チキン、エビ、カツ、なす...",
@@ -298,73 +301,55 @@ def _render_pdf_panel(pdfs, folder, key_prefix):
     ]
     st.caption(f"全 {len(pdfs)} 件 / {len(filtered)} 件表示")
 
-    sel_key = f"sel_{key_prefix}"
-    if sel_key not in st.session_state:
-        st.session_state[sel_key] = None
-    sel = st.session_state[sel_key]
-    if sel and sel not in pdfs:
-        sel = None
-        st.session_state[sel_key] = None
-
     if not filtered:
         st.info("該当するメニューが見つかりません。")
         return
 
-    # ── ボタングリッド（Streamlit columns ではなく CSS grid）──────
-    # Streamlit ボタンを使いつつ、外側 div で CSS grid を制御
-    COLS = 3
-    for i in range(0, len(filtered), COLS):
-        row_files = filtered[i:i + COLS]
-        cols = st.columns(COLS, gap="small")
-        for col, fname in zip(cols, row_files):
-            cname  = clean_curry_name(fname)
-            is_sel = (sel == fname)
-            with col:
-                if st.button(
-                    ("✅ " if is_sel else "") + cname,
-                    key=f"btn_{key_prefix}_{fname}",
-                    use_container_width=True,
-                    type="primary" if is_sel else "secondary",
-                ):
-                    st.session_state[sel_key] = None if is_sel else fname
-                    st.rerun()
+    # 選択状態（query params で管理 → HTML リンクから更新可能）
+    qp_key = f"pdf_{key_prefix}"
+    sel = st.query_params.get(qp_key, "")
+    if sel not in pdfs:
+        sel = ""
 
-    # ── PDF表示（常に縦積み・フル幅）─────────────────────────────
+    # ── ボタングリッド（純HTML） ──────────────────────────────
+    tiles_html = '<div class="pdf-grid">'
+    for fname in filtered:
+        cname   = clean_curry_name(fname)
+        is_sel  = (sel == fname)
+        cls     = "pdf-tile sel" if is_sel else "pdf-tile"
+        # 選択済みをクリック → 解除、未選択 → 選択
+        new_qp  = dict(st.query_params)
+        if is_sel:
+            new_qp.pop(qp_key, None)
+        else:
+            new_qp[qp_key] = fname
+        qs = "&".join(f"{k}={v}" for k, v in new_qp.items())
+        href = f"?{qs}" if qs else "?"
+        tiles_html += f'<a href="{href}" class="{cls}">{cname}</a>'
+    tiles_html += '</div>'
+    st.markdown(tiles_html, unsafe_allow_html=True)
+
+    # ── PDF表示（縦積み・フル幅）─────────────────────────────
     if sel:
         cname = clean_curry_name(sel)
-        st.divider()
-        hc1, hc2 = st.columns([5, 1])
-        with hc1:
-            st.markdown(f"**📄 {cname}**")
-        with hc2:
-            if st.button("✖ 閉じる", key=f"close_{key_prefix}", use_container_width=True):
-                st.session_state[sel_key] = None
-                st.rerun()
+        st.markdown(f"**📄 {cname}**")
         embed_pdf(os.path.join(folder, sel))
 
 
 def embed_pdf(file_path):
-    """PDFをBase64エンコードして表示。別タブリンク（iOS対策）も常に併記"""
+    """PDFを表示。別タブリンク（iOS対策）＋iframe埋め込み"""
     with open(file_path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode("utf-8")
     data_uri = f"data:application/pdf;base64,{b64}"
 
-    # 別タブで開くボタン（iOS Safariでiframeが表示されない場合の対策）
     st.markdown(
-        f'<a class="pdf-open-link" href="{data_uri}" target="_blank">'
-        f'📄 PDFを別タブで開く</a>',
+        f'<a class="pdf-open-btn" href="{data_uri}" target="_blank">📄 別タブで開く（iPhone はこちら）</a>',
         unsafe_allow_html=True,
     )
-
-    # iframeで埋め込み（Android Chrome・PCで動作）
     st.markdown(f"""
-<iframe
-    src="{data_uri}"
-    width="100%"
-    height="85vh"
-    style="border:1px solid #e0e0e0; border-radius:0 0 8px 8px; display:block;"
-    type="application/pdf">
-</iframe>
+<iframe src="{data_uri}" width="100%" height="85vh"
+    style="border:1px solid #ddd; border-radius:8px; display:block;"
+    type="application/pdf"></iframe>
 """, unsafe_allow_html=True)
 
 
