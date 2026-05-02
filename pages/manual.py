@@ -1,4 +1,5 @@
 import sys, os, re, base64
+import fitz  # pymupdf
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 from utils import (apply_theme, require_login, page_header, load_json, save_json,
@@ -273,9 +274,10 @@ def _render_pdf_panel(pdfs, folder, key_prefix):
                     st.session_state[sel_key] = None if is_sel else fname
                     st.rerun()
 
-    # ── PDF表示（縦積み・フル幅）─────────────────────────────
+    # ── PDF表示 ────────────────────────────────────────────────
     if sel:
         cname = clean_curry_name(sel)
+        fpath = os.path.join(folder, sel)
         st.divider()
         c1, c2 = st.columns([5, 1])
         with c1:
@@ -284,24 +286,69 @@ def _render_pdf_panel(pdfs, folder, key_prefix):
             if st.button("✖", key=f"close_{key_prefix}", use_container_width=True):
                 st.session_state[sel_key] = None
                 st.rerun()
-        embed_pdf(os.path.join(folder, sel))
+        render_pdf_as_images(fpath, key_prefix)
 
 
-def embed_pdf(file_path):
-    """PDFを表示。別タブリンク（iOS対策）＋iframe埋め込み"""
+@st.cache_data(show_spinner="PDFを読み込み中...")
+def _pdf_to_images(file_path: str) -> list[bytes]:
+    """PDFの全ページをPNG画像に変換してキャッシュ"""
+    doc = fitz.open(file_path)
+    images = []
+    for page in doc:
+        mat = fitz.Matrix(2.0, 2.0)   # 2倍解像度（鮮明）
+        pix = page.get_pixmap(matrix=mat)
+        images.append(pix.tobytes("png"))
+    doc.close()
+    return images
+
+
+def render_pdf_as_images(file_path: str, key_prefix: str = ""):
+    """PDFをページ画像として表示（スマホ・PC共通）"""
+    images = _pdf_to_images(file_path)
+    total = len(images)
+
+    if total == 0:
+        st.error("PDFを読み込めませんでした。")
+        return
+
+    # ページナビ（複数ページの場合）
+    page_key = f"page_{key_prefix}_{os.path.basename(file_path)}"
+    if page_key not in st.session_state:
+        st.session_state[page_key] = 0
+    page_idx = st.session_state[page_key]
+
+    if total > 1:
+        nav1, nav2, nav3 = st.columns([1, 3, 1])
+        with nav1:
+            if st.button("◀", key=f"prev_{key_prefix}", disabled=(page_idx == 0),
+                         use_container_width=True):
+                st.session_state[page_key] = page_idx - 1
+                st.rerun()
+        with nav2:
+            st.markdown(
+                f"<div style='text-align:center;padding:6px 0;font-weight:600;'>"
+                f"{page_idx + 1} / {total} ページ</div>",
+                unsafe_allow_html=True,
+            )
+        with nav3:
+            if st.button("▶", key=f"next_{key_prefix}", disabled=(page_idx == total - 1),
+                         use_container_width=True):
+                st.session_state[page_key] = page_idx + 1
+                st.rerun()
+
+    # 画像表示
+    st.image(images[page_idx], use_container_width=True)
+
+    # ダウンロードボタン（念のため）
     with open(file_path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("utf-8")
-    data_uri = f"data:application/pdf;base64,{b64}"
-
-    st.markdown(
-        f'<a class="pdf-open-btn" href="{data_uri}" target="_blank">📄 別タブで開く（iPhone はこちら）</a>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(f"""
-<iframe src="{data_uri}" width="100%" height="85vh"
-    style="border:1px solid #ddd; border-radius:8px; display:block;"
-    type="application/pdf"></iframe>
-""", unsafe_allow_html=True)
+        st.download_button(
+            "📥 PDFをダウンロード",
+            data=f.read(),
+            file_name=os.path.basename(file_path),
+            mime="application/pdf",
+            use_container_width=True,
+            key=f"dl_{key_prefix}_{os.path.basename(file_path)}",
+        )
 
 
 # ─── ページヘッダー ──────────────────────────────────────────
