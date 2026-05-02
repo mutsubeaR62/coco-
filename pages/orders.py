@@ -233,6 +233,9 @@ with tab_order:
             st.markdown("<hr style='margin:2px 0 8px; border-color:#e85d04; border-width:2px;'>",
                         unsafe_allow_html=True)
 
+            def _on_stock_change(name):
+                st.session_state.stock_state[name] = st.session_state[f"stock_{name}"]
+
             for p in filtered:
                 name     = p["name"]
                 note     = p.get("note", "")
@@ -255,14 +258,14 @@ with tab_order:
                         st.caption(f"📌 {note[:30]}{'…' if len(note) > 30 else ''}")
 
                 with col_input:
-                    new_stock = st.selectbox(
+                    st.selectbox(
                         "在庫", list(range(0, 51)),
                         index=min(stock, 50),
-                        key=f"stock_{name}", label_visibility="collapsed"
+                        key=f"stock_{name}",
+                        label_visibility="collapsed",
+                        on_change=_on_stock_change,
+                        args=(name,)
                     )
-                    if new_stock != stock:
-                        st.session_state.stock_state[name] = new_stock
-                        st.rerun()
 
                 with col_order:
                     if order is None:
@@ -333,13 +336,16 @@ with tab_order:
                     if name not in nd_items:
                         nd_items[name] = {"normal": 0, "event": 0}
                     nd_items[name][nd_col] = item["order"]
+                    # 翌日納品タブのウィジェット値も即時更新
+                    st.session_state[f"nd_n_{name}"] = item["order"] if nd_col == "normal" else nd_items[name].get("normal", 0)
+                    st.session_state[f"nd_e_{name}"] = item["order"] if nd_col == "event"  else nd_items[name].get("event", 0)
                 save_json("next_delivery.json", {
                     "items":      nd_items,
                     "updated":    datetime.now().strftime("%Y-%m-%d %H:%M"),
                     "updated_by": user["name"],
                 })
-                nd_label = "通常" if day_key == "default" else "イベント"
-                st.info(f"📬 翌日納品数（{nd_label}）を自動で更新しました！")
+                nd_label = "通常（木曜→金曜）" if day_key == "default" else "イベント"
+                st.info(f"📬 翌日納品数（{nd_label}）を自動で更新しました！「翌日納品」タブで確認できます。")
 
             # スタンプ進捗
             prog = get_progress(username)

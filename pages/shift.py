@@ -16,12 +16,52 @@ user  = st.session_state.user
 today = date.today()
 
 WEEKDAY_JP = ["月", "火", "水", "木", "金", "土", "日"]
-HOURS = list(range(9, 24))
 
-TIME_OPTS = []
-for _h in range(8, 24):
-    TIME_OPTS.append(f"{_h:02d}:00")
-    TIME_OPTS.append(f"{_h:02d}:30")
+# 30分刻み
+HALF_SLOTS = [(h, m) for h in range(9, 24) for m in (0, 30)]
+TIME_OPTS  = [f"{h:02d}:{m:02d}" for h in range(8, 25) for m in (0, 30)]
+
+SHIFT_TYPES = ["自店舗", "レギュラー", "欠員", "地店舗ヘルプ", "発注", "ごみ捨て"]
+TYPE_COLORS = {
+    "自店舗":       "#5b4b97",
+    "レギュラー":   "#1e6ab5",
+    "欠員":         "#dc3545",
+    "地店舗ヘルプ": "#e83e8c",
+    "発注":         "#f48c06",
+    "ごみ捨て":     "#28a745",
+}
+
+
+def get_periods(si):
+    if "periods" in si and si["periods"]:
+        return si["periods"]
+    s, e = si.get("start", ""), si.get("end", "")
+    return [[s, e]] if s and e else []
+
+
+def slot_in_periods(periods, h, m):
+    ss, se = h * 60 + m, h * 60 + m + 30
+    for p in periods:
+        try:
+            sh, sm = map(int, p[0].split(":"))
+            eh, em = map(int, p[1].split(":"))
+            if (sh * 60 + sm) < se and (eh * 60 + em) > ss:
+                return True
+        except Exception:
+            pass
+    return False
+
+
+def calc_hours(periods):
+    total = 0
+    for p in periods:
+        try:
+            sh, sm = map(int, p[0].split(":"))
+            eh, em = map(int, p[1].split(":"))
+            total += (eh * 60 + em) - (sh * 60 + sm)
+        except Exception:
+            pass
+    return total / 60
 
 
 def get_requestable_months():
@@ -62,59 +102,62 @@ with tab_view:
     y_v, m_v = int(sel_month_v[:4]), int(sel_month_v[5:7])
     num_days_v = calendar.monthrange(y_v, m_v)[1]
 
-    def _get_pds(si):
-        if "periods" in si and si["periods"]:
-            return si["periods"]
-        s, e = si.get("start", ""), si.get("end", "")
-        return [[s, e]] if s and e else []
+    # 凡例
+    leg_html = "<div style='display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px;font-size:12px;'>"
+    for t, c in TYPE_COLORS.items():
+        leg_html += f"<span style='background:{c};color:#fff;padding:2px 9px;border-radius:4px;'>{t}</span>"
+    leg_html += "</div>"
+    st.markdown(leg_html, unsafe_allow_html=True)
 
-    def _in_pds(pds, h):
-        for p in pds:
-            try:
-                sh, sm = map(int, p[0].split(":"))
-                eh, em = map(int, p[1].split(":"))
-                if (sh * 60 + sm) < (h + 1) * 60 and (eh * 60 + em) > h * 60:
-                    return True
-            except Exception:
-                pass
-        return False
-
-    # 1か月分を一気にHTML生成
-    html_v = """
+    # CSSは1回だけ出力
+    st.markdown("""
 <style>
-.ms-wrap { margin-bottom: 18px; }
-.ms-hdr  { font-size: 1rem; font-weight: 700; padding: 6px 12px;
-           background: #f8f9fa; border-left: 4px solid #e85d04;
-           border-radius: 6px 6px 0 0; }
-.ms-sun  { border-left-color: #dc3545; color: #dc3545; }
-.ms-sat  { border-left-color: #1e6ab5; color: #1e6ab5; }
-.ms-none { font-size: 0.82rem; color: #aaa; padding: 4px 12px 8px;
+.sv-wrap { margin-bottom: 20px; }
+.sv-hdr  { font-size: 1rem; font-weight: 700; padding: 6px 12px;
+           background: #f8f9fa; border-left: 3px solid #e85d04;
+           border-radius: 6px 6px 0 0; color: #222; }
+.sv-sun  { border-left-color: #dc3545 !important; color: #dc3545; }
+.sv-sat  { border-left-color: #1e6ab5 !important; color: #1e6ab5; }
+.sv-memo { background:#fffdf0; border:1px solid #f0c060; border-radius:4px;
+           padding:4px 10px; font-size:0.82rem; color:#555; margin:4px 0 6px; }
+.sv-none { font-size: 0.82rem; color: #bbb; padding: 4px 12px 8px;
            background: #fafafa; border-radius: 0 0 6px 6px; }
-.stbl3   { border-collapse: collapse; font-size: 12px; width: 100%; }
-.stbl3 th, .stbl3 td { border: 1px solid #ddd; padding: 4px 3px;
-                        text-align: center; white-space: nowrap; }
-.stbl3 .nc { text-align: left; min-width: 80px; font-weight: 600; background: #fafafa; }
-.stbl3 .ac { text-align: left; min-width: 90px; font-size: 11px; color: #555; background: #fafafa; }
-.stbl3 thead th { background: #f0f0f0; font-weight: 700; }
-.cb3 { background: #5b4b97 !important; }
-.cs3 { background: #1e6ab5 !important; }
+.s30v    { border-collapse:collapse; font-size:12px; width:100%; }
+.s30v th,.s30v td { border:1px solid #e8e8e8; padding:4px 0; text-align:center; white-space:nowrap; color:#333; }
+.s30v .nc { text-align:left; min-width:72px; font-weight:600; background:#fafafa; padding:4px 8px; color:#222; }
+.s30v .ac { text-align:left; min-width:60px; font-size:11px; color:#666; background:#fafafa; padding:4px 5px; }
+.s30v .hh { min-width:14px; width:14px; }
+.s30v .tw { min-width:34px; font-weight:600; color:#444; }
+.s30v .oh { border-left:1px solid #bbb !important; }
+.s30v thead th { background:#f5f5f5; font-weight:600; color:#555; font-size:11px; }
+.s30v .cnt-low { color:#dc3545 !important; font-weight:700; }
 </style>
-"""
+""", unsafe_allow_html=True)
+
     for day_num in range(1, num_days_v + 1):
         d  = date(y_v, m_v, day_num)
         ds = d.strftime("%Y-%m-%d")
         wd = WEEKDAY_JP[d.weekday()]
-        hdr_cls = "ms-hdr ms-sun" if d.weekday() == 6 else (
-                  "ms-hdr ms-sat" if d.weekday() == 5 else "ms-hdr")
+
+        if d.weekday() == 6:
+            hdr_cls = "sv-hdr sv-sun"
+        elif d.weekday() == 5:
+            hdr_cls = "sv-hdr sv-sat"
+        else:
+            hdr_cls = "sv-hdr"
 
         sc_day   = get_shift_schedule(ds)
         shifts_d = sc_day.get("shifts", {})
+        memo_d   = sc_day.get("memo", "")
 
-        html_v += f"<div class='ms-wrap'>"
-        html_v += f"<div class='{hdr_cls}'>{m_v}/{day_num}（{wd}）</div>"
+        html_day = f"<div class='sv-wrap'>"
+        html_day += f"<div class='{hdr_cls}'>{m_v}/{day_num}（{wd}）</div>"
+
+        if memo_d:
+            html_day += f"<div class='sv-memo'>📝 {memo_d}</div>"
 
         if not shifts_d:
-            html_v += "<div class='ms-none'>— 未登録 —</div>"
+            html_day += "<div class='sv-none'>— 未登録 —</div>"
         else:
             sorted_d = sorted(
                 shifts_d.items(),
@@ -123,26 +166,56 @@ with tab_view:
                     users_dict_v.get(x[0], {}).get("name", x[0]),
                 ),
             )
-            html_v += "<div style='overflow-x:auto;'><table class='stbl3'><thead><tr>"
-            html_v += "<th class='nc'>名前</th><th class='ac'>備考</th>"
-            for h in HOURS:
-                html_v += f"<th>{h}</th>"
-            html_v += "</tr></thead><tbody>"
-            for uname, si in sorted_d:
-                ud   = users_dict_v.get(uname, {})
-                name = ud.get("name", uname)
-                emp  = get_employee_type(ud)
-                cls  = "cs3" if emp == "seishain" else "cb3"
-                note = si.get("note", "")
-                pds  = _get_pds(si)
-                html_v += f'<tr><td class="nc">{name}</td><td class="ac">{note}</td>'
-                for h in HOURS:
-                    html_v += f'<td class="{cls}"></td>' if _in_pds(pds, h) else "<td></td>"
-                html_v += "</tr>"
-            html_v += "</tbody></table></div>"
-        html_v += "</div>"
 
-    st.markdown(html_v, unsafe_allow_html=True)
+            # 人員数カウント
+            count_per_slot = {(h, m): 0 for h, m in HALF_SLOTS}
+            for uname, si in shifts_d.items():
+                pds = get_periods(si)
+                for h, m in HALF_SLOTS:
+                    if slot_in_periods(pds, h, m):
+                        count_per_slot[(h, m)] += 1
+
+            html_day += "<div style='overflow-x:auto;'><table class='s30v'><thead><tr>"
+            html_day += "<th class='nc'>名前</th><th class='ac'>備考</th>"
+            for h in range(9, 24):
+                html_day += f'<th class="oh" colspan="2">{h}</th>'
+            html_day += "<th class='tw'>時間</th></tr></thead><tbody>"
+
+            for uname, si in sorted_d:
+                ud    = users_dict_v.get(uname, {})
+                name  = ud.get("name", uname)
+                note  = si.get("note", "")
+                stype = si.get("type", "自店舗")
+                color = TYPE_COLORS.get(stype, "#5b4b97")
+                pds   = get_periods(si)
+                hrs   = calc_hours(pds)
+
+                html_day += f'<tr><td class="nc">{name}</td><td class="ac">{note}</td>'
+                for h, m in HALF_SLOTS:
+                    cls = "hh oh" if m == 0 else "hh"
+                    if slot_in_periods(pds, h, m):
+                        html_day += f'<td class="{cls}" style="background:{color}"></td>'
+                    else:
+                        html_day += f'<td class="{cls}"></td>'
+                html_day += f'<td class="tw">{hrs:.1f}</td></tr>'
+
+            # 人員数行
+            html_day += '<tr style="border-top:2px solid #999;">'
+            html_day += '<td class="nc" colspan="2" style="font-weight:700;color:#666;padding:3px 6px;">人員数</td>'
+            for h, m in HALF_SLOTS:
+                c   = count_per_slot[(h, m)]
+                cls = "hh oh" if m == 0 else "hh"
+                if 0 < c < int(sc_day.get("min_staff", 3)):
+                    html_day += f'<td class="{cls} cnt-low">{c}</td>'
+                else:
+                    html_day += f'<td class="{cls}">{c if c else ""}</td>'
+            html_day += '<td class="tw"></td></tr>'
+
+            html_day += "</tbody></table></div>"
+
+        html_day += "</div>"
+        st.markdown(html_day, unsafe_allow_html=True)
+
 
 # ══════════════════════════════════════════════════════════════
 # TAB: シフト申請

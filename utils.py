@@ -2,6 +2,7 @@ import json
 import hashlib
 import os
 import streamlit as st
+import streamlit.components.v1 as _components
 from datetime import datetime
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -10,34 +11,23 @@ DATA_DIR = os.path.join(ROOT_DIR, "data")
 # ─── テーマCSS ─────────────────────────────────────────────────
 THEME_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
-
-html, body, [class*="css"] { font-family: 'Noto Sans JP', sans-serif; }
-
-/* ══ サイドバー ══════════════════════════════════════════════
-   config.toml で secondaryBackgroundColor = "#fff3e0" を設定済み。
-   ここでは文字色・アクセントカラーのみ上書きする。
-*/
-[data-testid="stSidebar"] {
-    border-right: 2px solid #e85d04;
+html, body, [class*="css"] {
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', sans-serif;
 }
+
+/* ══ サイドバー ══════════════════════════════════════════════ */
+[data-testid="stSidebar"] { border-right: 2px solid #e85d04; }
 section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
 
-/* サイドバー内の全テキストを確実に濃い色にする */
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] a,
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] div {
-    color: #1a1a1a !important;
-}
+[data-testid="stSidebar"] div { color: #1a1a1a !important; }
 
-/* ナビゲーションリンク */
 [data-testid="stSidebar"] a {
-    color: #333333 !important;
-    border-radius: 8px;
-    font-weight: 500 !important;
-    transition: all 0.15s;
+    color: #333333 !important; border-radius: 8px;
+    font-weight: 500 !important; transition: all 0.15s;
 }
 [data-testid="stSidebar"] a:hover {
     color: #e85d04 !important;
@@ -50,36 +40,53 @@ section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
     box-shadow: 0 2px 8px rgba(232,93,4,0.35);
 }
 
-/* ══ レスポンシブ対応 ═════════════════════════════════════════ */
-
-/* タブレット (〜1024px) */
-@media (max-width: 1024px) {
-    .page-header h1 { font-size: 1.3rem !important; }
-    .page-header p  { font-size: 0.82rem !important; }
-    .info-card { padding: 14px 16px !important; }
-    .stamp-circle { width: 60px !important; height: 60px !important; font-size: 1.6rem !important; }
-    .stamp-item { width: 76px !important; }
+/* ══ PC (1025px〜) ══════════════════════════════════════════ */
+@media (min-width: 1025px) {
+    .main .block-container {
+        padding: 1.5rem 2.5rem 2rem !important;
+        max-width: 1200px !important;
+    }
+    .page-header h1 { font-size: 1.7rem !important; }
+    .metric-value   { font-size: 2.2rem !important; }
+    .stamp-circle   { width: 80px !important; height: 80px !important; font-size: 2.2rem !important; }
+    .stamp-item     { width: 96px !important; }
 }
 
-/* スマホ (〜767px) */
-@media (max-width: 767px) {
-    /* メインコンテンツの余白を縮める */
+/* ══ タブレット (768px〜1024px) ════════════════════════════ */
+@media (min-width: 768px) and (max-width: 1024px) {
     .main .block-container {
-        padding: 0.8rem 0.6rem 2rem !important;
+        padding: 1rem 1.5rem 2rem !important;
+        max-width: 100% !important;
+    }
+    .page-header h1 { font-size: 1.3rem !important; }
+    .page-header p  { font-size: 0.82rem !important; }
+    .info-card      { padding: 14px 16px !important; }
+    .metric-value   { font-size: 1.7rem !important; }
+    .stamp-circle   { width: 62px !important; height: 62px !important; font-size: 1.7rem !important; }
+    .stamp-item     { width: 78px !important; }
+    .stButton > button { min-height: 42px !important; }
+}
+
+/* ══ スマホ (〜767px) ══════════════════════════════════════ */
+@media (max-width: 767px) {
+    .main .block-container {
+        padding: 0.7rem 0.5rem 2rem !important;
         max-width: 100% !important;
     }
 
-    /* iOS でのテキスト自動ズームを防ぐ（16px未満だとズームされる） */
-    input, textarea, select {
-        font-size: 16px !important;
-    }
+    /* iOS テキスト自動ズーム防止 */
+    input, textarea, select { font-size: 16px !important; }
 
     /* ページヘッダー */
-    .page-header { padding: 12px 14px !important; border-radius: 10px !important; margin-bottom: 14px !important; }
+    .page-header {
+        padding: 11px 13px !important;
+        border-radius: 10px !important;
+        margin-bottom: 12px !important;
+    }
     .page-header h1 { font-size: 1.05rem !important; }
-    .page-header p  { font-size: 0.75rem !important; }
+    .page-header p  { font-size: 0.73rem !important; }
 
-    /* カラムを折り返す（2列グリッド） */
+    /* カラム折り返し */
     [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
         gap: 6px !important;
@@ -87,53 +94,57 @@ section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
     [data-testid="stHorizontalBlock"] > [data-testid="column"] {
         min-width: calc(50% - 6px) !important;
         flex: 1 1 calc(50% - 6px) !important;
-        width: calc(50% - 6px) !important;
     }
 
-    /* ボタンはタッチしやすいサイズ */
+    /* ボタン（タッチしやすいサイズ） */
     .stButton > button {
-        min-height: 44px !important;
-        font-size: 0.9rem !important;
-        padding: 8px 12px !important;
+        min-height: 46px !important;
+        font-size: 0.92rem !important;
+        padding: 10px 14px !important;
     }
 
     /* カード */
-    .info-card { padding: 10px 12px !important; border-radius: 10px !important; }
-    .metric-card { padding: 12px 8px !important; }
+    .info-card   { padding: 10px 12px !important; border-radius: 10px !important; }
+    .metric-card { padding: 10px 6px !important; }
     .metric-value { font-size: 1.5rem !important; }
+    .metric-label { font-size: 0.72rem !important; }
 
     /* スタンプ */
-    .stamp-grid { gap: 8px !important; }
-    .stamp-circle { width: 50px !important; height: 50px !important; font-size: 1.3rem !important; }
-    .stamp-item { width: 62px !important; }
-    .stamp-name { font-size: 0.58rem !important; }
+    .stamp-grid   { gap: 7px !important; }
+    .stamp-circle { width: 52px !important; height: 52px !important; font-size: 1.35rem !important; }
+    .stamp-item   { width: 64px !important; }
+    .stamp-name   { font-size: 0.58rem !important; }
 
     /* フラッシュカード */
-    .flashcard { padding: 24px 14px !important; min-height: 130px !important; }
+    .flashcard { padding: 22px 12px !important; min-height: 120px !important; }
     .flashcard .fc-text { font-size: 1.1rem !important; }
 
     /* なぜやるか */
-    .why-box { font-size: 0.78rem !important; margin-left: 10px !important; }
+    .why-box { font-size: 0.77rem !important; margin-left: 8px !important; }
 
-    /* タブのラベルを小さく */
-    [data-testid="stTabs"] button { font-size: 0.8rem !important; padding: 6px 10px !important; }
+    /* タブ */
+    [data-testid="stTabs"] button {
+        font-size: 0.78rem !important;
+        padding: 5px 8px !important;
+    }
 
-    /* テーブルのスクロール */
+    /* テーブルスクロール */
     [data-testid="stDataFrame"], .stbl, .shift-tbl {
         overflow-x: auto !important;
         display: block !important;
     }
 
-    /* メトリクス行 */
-    [data-testid="stMetric"] { padding: 8px !important; }
+    /* メトリクス */
+    [data-testid="stMetric"]      { padding: 7px !important; }
     [data-testid="stMetricValue"] { font-size: 1.3rem !important; }
-    [data-testid="stMetricLabel"] { font-size: 0.7rem !important; }
+    [data-testid="stMetricLabel"] { font-size: 0.68rem !important; }
 
     /* サイドバーユーザーカード */
-    .sidebar-user { padding: 10px 12px !important; }
-    .sidebar-user .name { font-size: 0.95rem !important; }
+    .sidebar-user       { padding: 9px 11px !important; }
+    .sidebar-user .name { font-size: 0.93rem !important; }
 }
 
+/* ══ 共通コンポーネント ════════════════════════════════════ */
 
 /* Page header */
 .page-header {
@@ -158,7 +169,7 @@ section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
 /* Metric cards */
 .metric-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .metric-card {
-    flex: 1; min-width: 120px; background: white; border-radius: 12px;
+    flex: 1; min-width: 110px; background: white; border-radius: 12px;
     padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 .metric-value { font-size: 2rem; font-weight: 700; color: #e85d04; }
@@ -177,15 +188,13 @@ section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
 }
 .stamp-circle:hover { transform: scale(1.1); }
 .stamp-circle.locked {
-    background: #e0e0e0;
-    box-shadow: none;
-    filter: grayscale(1);
-    opacity: 0.4;
+    background: #e0e0e0; box-shadow: none;
+    filter: grayscale(1); opacity: 0.4;
 }
-.stamp-name { font-size: 0.7rem; font-weight: 700; color: #333; }
+.stamp-name        { font-size: 0.7rem; font-weight: 700; color: #333; }
 .stamp-name.locked { color: #aaa; }
 
-/* Why box (checklist) */
+/* Why box */
 .why-box {
     background: #fff8f0; border-left: 3px solid #f48c06;
     padding: 8px 12px; border-radius: 0 8px 8px 0;
@@ -199,8 +208,7 @@ section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
     text-align: center; min-height: 180px;
     display: flex; align-items: center; justify-content: center;
     flex-direction: column; margin: 16px 0;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
-    transition: all 0.3s;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12); transition: all 0.3s;
 }
 .flashcard-front { background: linear-gradient(135deg, #e85d04, #f48c06); color: white; }
 .flashcard-back  { background: linear-gradient(135deg, #1b4332, #2d6a4f); color: white; }
@@ -256,6 +264,26 @@ def is_manager(user):
     """管理者または代行かどうか。"""
     return user.get("role") in ("admin", "daiko")
 
+# ─── デバイス検出 ─────────────────────────────────────────────
+def inject_device_detector():
+    """ビューポート幅を検出してURLパラメータ _dv にセットする。未検出時のみ実行。"""
+    if "_dv" not in st.query_params:
+        _components.html("""
+<script>
+(function(){
+    var w = window.parent.innerWidth || window.parent.document.documentElement.clientWidth || 1280;
+    var dv = w < 768 ? 'mobile' : (w < 1025 ? 'tablet' : 'pc');
+    var url = new URL(window.parent.location.href);
+    url.searchParams.set('_dv', dv);
+    window.parent.location.replace(url.toString());
+})();
+</script>
+""", height=0)
+
+def get_device():
+    """現在のデバイスタイプを返す: 'pc' | 'tablet' | 'mobile'"""
+    return st.query_params.get("_dv", "pc")
+
 # ─── データ管理 ───────────────────────────────────────────────
 def _ensure_data():
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -270,32 +298,41 @@ def _get_supabase():
     except Exception:
         return None
 
-def load_json(filename, default=None):
+@st.cache_data(ttl=30)
+def _load_json_cached(filename):
+    """Supabaseまたはローカルからデータを取得（30秒キャッシュ）"""
     sb = _get_supabase()
     if sb:
         try:
             result = sb.table("json_store").select("data").eq("key", filename).execute()
             if result.data:
                 return result.data[0]["data"]
-            return default if default is not None else {}
+            return None
         except Exception:
             pass
     # フォールバック: ローカルファイル
     _ensure_data()
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
-        return default if default is not None else {}
+        return None
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception:
+        return None
+
+def load_json(filename, default=None):
+    result = _load_json_cached(filename)
+    if result is None:
         return default if default is not None else {}
+    return result
 
 def save_json(filename, data):
     sb = _get_supabase()
     if sb:
         try:
             sb.table("json_store").upsert({"key": filename, "data": data}).execute()
+            _load_json_cached.clear()  # 保存後はキャッシュをクリア
             return
         except Exception:
             pass
@@ -304,6 +341,7 @@ def save_json(filename, data):
     path = os.path.join(DATA_DIR, filename)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    _load_json_cached.clear()
 
 # ─── ユーザー管理 ─────────────────────────────────────────────
 def _hash(pw):
