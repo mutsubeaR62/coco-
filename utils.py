@@ -328,19 +328,27 @@ def load_json(filename, default=None):
     return result
 
 def save_json(filename, data):
-    sb = _get_supabase()
-    if sb:
-        try:
-            sb.table("json_store").upsert({"key": filename, "data": data}).execute()
-            _load_json_cached.clear()  # 保存後はキャッシュをクリア
-            return
-        except Exception:
-            pass
-    # フォールバック: ローカルファイル
+    # ── ローカルには常に書く（Supabase障害時のバックアップ）────
     _ensure_data()
     path = os.path.join(DATA_DIR, filename)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+    # ── Supabaseにも保存（設定されている場合）────────────────
+    sb = _get_supabase()
+    if sb:
+        last_err = None
+        for attempt in range(3):          # 最大3回リトライ
+            try:
+                sb.table("json_store").upsert({"key": filename, "data": data}).execute()
+                _load_json_cached.clear()
+                return
+            except Exception as e:
+                last_err = e
+                import time; time.sleep(0.3 * (attempt + 1))
+        # 3回失敗したら例外を上げて呼び出し元に伝える
+        raise RuntimeError(f"Supabaseへの保存に失敗しました: {last_err}")
+
     _load_json_cached.clear()
 
 # ─── ユーザー管理 ─────────────────────────────────────────────
@@ -348,14 +356,23 @@ def _hash(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
 def init_default_users():
-    data = load_json("users.json", {"users": []})
+    """ユーザーが1人もいない場合のみデフォルトを作成。Supabase接続不安定時は何もしない。"""
+    try:
+        data = load_json("users.json", None)  # None=取得失敗と区別できるようにする
+    except Exception:
+        return  # 取得失敗時は何もしない（既存データを上書きしない）
+    if data is None:
+        return  # Supabase/ローカル両方から取得できなかった場合は何もしない
     if not data.get("users"):
         defaults = [
             {"username": "manager",  "password": _hash("coco1234"), "name": "店長",      "role": "admin", "joined": "2020-04-01"},
             {"username": "staff1",   "password": _hash("coco1234"), "name": "先輩スタッフ","role": "staff", "joined": "2023-04-01"},
             {"username": "new1",     "password": _hash("coco1234"), "name": "新人さん",    "role": "new",   "joined": datetime.now().strftime("%Y-%m-%d")},
         ]
-        save_json("users.json", {"users": defaults})
+        try:
+            save_json("users.json", {"users": defaults})
+        except RuntimeError:
+            pass  # デフォルト作成失敗は無視
 
 def login_user(username, password):
     users = load_json("users.json", {"users": []}).get("users", [])
@@ -389,7 +406,7 @@ def add_user(username, password, name, role, employee_type=None, hourly_wage=Non
     data = load_json("users.json", {"users": []})
     for u in data["users"]:
         if u["username"] == username:
-            return False
+            return False, "同じユーザー名がすでに存在します。"
     emp_type = employee_type or ("seishain" if role == "admin" else "baito")
     wage = hourly_wage if hourly_wage is not None else (1500 if emp_type == "seishain" else 1050)
     data["users"].append({
@@ -403,8 +420,11 @@ def add_user(username, password, name, role, employee_type=None, hourly_wage=Non
         "secret_answer": _hash(secret_answer.strip().lower()) if secret_answer else "",
         "joined": datetime.now().strftime("%Y-%m-%d"),
     })
-    save_json("users.json", data)
-    return True
+    try:
+        save_json("users.json", data)
+    except RuntimeError as e:
+        return False, str(e)
+    return True, None
 
 def verify_secret_answer(username, answer):
     """秘密の質問の答えを照合する。"""

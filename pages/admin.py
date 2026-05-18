@@ -142,19 +142,22 @@ with tab_members:
             new_ckng_add = st.selectbox("調理レベル", ckng_opts_add)
         if st.form_submit_button("メンバーを追加", type="primary"):
             if new_name and new_username and new_pw:
-                success = add_user(new_username, new_pw, new_name, new_role,
-                                   employee_type=new_emp_type, hourly_wage=new_wage)
+                success, err_msg = add_user(new_username, new_pw, new_name, new_role,
+                                            employee_type=new_emp_type, hourly_wage=new_wage)
                 if success:
-                    update_user(new_username,
-                                birthday=new_bday_add,
-                                coco_spec={
-                                    "service": None if new_svc_add == "未取得" else new_svc_add,
-                                    "cooking": None if new_ckng_add == "未取得" else new_ckng_add,
-                                })
+                    try:
+                        update_user(new_username,
+                                    birthday=new_bday_add,
+                                    coco_spec={
+                                        "service": None if new_svc_add == "未取得" else new_svc_add,
+                                        "cooking": None if new_ckng_add == "未取得" else new_ckng_add,
+                                    })
+                    except Exception:
+                        pass
                     st.success(f"✅ {new_name}さん（@{new_username}）を追加しました！")
                     st.rerun()
                 else:
-                    st.error("そのユーザー名は既に使われています。")
+                    st.error(f"❌ 追加に失敗しました: {err_msg}")
             else:
                 st.error("すべての項目を入力してください。")
 
