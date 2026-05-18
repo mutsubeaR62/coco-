@@ -15,34 +15,6 @@
       "joined": "2020-04-01"
     },
     {
-      "username": "staff1",
-      "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
-      "name": "先輩スタッフ",
-      "role": "mate",
-      "employee_type": "baito",
-      "hourly_wage": 1100,
-      "birthday": "",
-      "coco_spec": {
-        "service": null,
-        "cooking": null
-      },
-      "joined": "2023-04-01"
-    },
-    {
-      "username": "new1",
-      "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
-      "name": "新人さん",
-      "role": "kenshu",
-      "employee_type": "baito",
-      "hourly_wage": 1050,
-      "birthday": "",
-      "coco_spec": {
-        "service": null,
-        "cooking": null
-      },
-      "joined": "2026-04-24"
-    },
-    {
       "username": "orino",
       "password": "70d4ee919c590ad4c2b5327af95fdd603a4059add3d9b7d4e50d1b9f2a1aee1f",
       "name": "織野允也",
