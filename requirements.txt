@@ -2,3 +2,4 @@ streamlit
 pandas
 extra-streamlit-components
 pymupdf
+supabase

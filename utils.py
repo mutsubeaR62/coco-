@@ -365,9 +365,10 @@ def init_default_users():
         return  # Supabase/ローカル両方から取得できなかった場合は何もしない
     if not data.get("users"):
         defaults = [
-            {"username": "manager",  "password": _hash("coco1234"), "name": "店長",      "role": "admin", "joined": "2020-04-01"},
-            {"username": "staff1",   "password": _hash("coco1234"), "name": "先輩スタッフ","role": "staff", "joined": "2023-04-01"},
-            {"username": "new1",     "password": _hash("coco1234"), "name": "新人さん",    "role": "new",   "joined": datetime.now().strftime("%Y-%m-%d")},
+            {"username": "manager", "password": _hash("coco1234"), "name": "店長",
+             "role": "admin", "employee_type": "seishain", "hourly_wage": 1500,
+             "birthday": "", "coco_spec": {"service": None, "cooking": None},
+             "joined": "2020-04-01"},
         ]
         try:
             save_json("users.json", {"users": defaults})
