@@ -305,7 +305,22 @@ if role != "kenshu":
             cats = tmpl.get("categories", DEFAULT_GRADUATION_TEMPLATE["categories"])
 
             for ci, cat in enumerate(cats):
-                st.markdown(f"**{cat['name']}**")
+                # カテゴリ名 + 削除ボタン
+                col_name, col_del = st.columns([10, 1])
+                with col_name:
+                    new_cat_name = st.text_input(
+                        "カテゴリ名", value=cat["name"],
+                        key=f"catname_{ci}",
+                    )
+                with col_del:
+                    st.write("")
+                    if st.button("🗑️", key=f"cat_del_{ci}",
+                                 help="このカテゴリごと削除"):
+                        cats.pop(ci)
+                        save_json("graduation_template.json", {"categories": cats})
+                        st.rerun()
+
+                # カテゴリ内の項目
                 new_items = []
                 for ii, item in enumerate(cat["items"]):
                     col1, col2 = st.columns([11, 1])
@@ -329,8 +344,20 @@ if role != "kenshu":
                 if add_item:
                     new_items.append(add_item)
 
+                cats[ci]["name"]  = new_cat_name
                 cats[ci]["items"] = new_items
-                st.write("")
+                st.divider()
+
+            # カテゴリを新規追加
+            new_cat_input = st.text_input(
+                "カテゴリを追加", placeholder="新しいカテゴリ名を入力して Enter",
+                key="tmpl_new_cat",
+            )
+            if new_cat_input:
+                import uuid
+                cats.append({"id": uuid.uuid4().hex[:8], "name": new_cat_input, "items": []})
+                save_json("graduation_template.json", {"categories": cats})
+                st.rerun()
 
             if st.button("変更を保存", type="primary", key="save_tmpl"):
                 save_json("graduation_template.json", {"categories": cats})
