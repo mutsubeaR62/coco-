@@ -913,10 +913,9 @@ with tab_teisu:
                 else:
                     st.info("最低1列は必要です。")
 
-    # ── 編集テーブル ────────────────────────────────────────
+    # ── テーブル表示 ────────────────────────────────────────
     if t_rows:
         df_teisu = pd.DataFrame(t_rows, columns=t_columns)
-        # 列が欠けている場合は空文字で補完
         for c in t_columns:
             if c not in df_teisu.columns:
                 df_teisu[c] = ""
@@ -924,20 +923,29 @@ with tab_teisu:
     else:
         df_teisu = pd.DataFrame(columns=t_columns)
 
-    edited = st.data_editor(
-        df_teisu,
-        num_rows="dynamic",
-        use_container_width=True,
-        hide_index=True,
-        column_config={c: st.column_config.TextColumn(c, width="medium") for c in t_columns},
-        key="teisu_editor",
-    )
+    can_edit = role not in ("kenshu", "new")
 
-    if st.button("保存", type="primary", key="teisu_save"):
-        new_rows = [
-            row for row in edited.to_dict("records")
-            if any(str(v).strip() for v in row.values())
-        ]
-        save_json("teisu_table.json", {"columns": t_columns, "rows": new_rows})
-        st.success("保存しました！")
-        st.rerun()
+    if can_edit:
+        edited = st.data_editor(
+            df_teisu,
+            num_rows="dynamic",
+            use_container_width=True,
+            hide_index=True,
+            column_config={c: st.column_config.TextColumn(c, width="medium") for c in t_columns},
+            key="teisu_editor",
+        )
+        if st.button("保存", type="primary", key="teisu_save"):
+            new_rows = [
+                row for row in edited.to_dict("records")
+                if any(str(v).strip() for v in row.values())
+            ]
+            save_json("teisu_table.json", {"columns": t_columns, "rows": new_rows})
+            st.success("保存しました！")
+            st.rerun()
+    else:
+        st.caption("※ 閲覧のみ（編集はメイト以上）")
+        st.dataframe(
+            df_teisu,
+            use_container_width=True,
+            hide_index=True,
+        )
