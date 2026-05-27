@@ -182,6 +182,130 @@ DEFAULT_MANUAL = {
 }
 
 
+# ─── ソース量データ（2026年6月4日更新） ────────────────────────
+SAUCE_DATA = [
+    {
+        "rice_g": 100, "label": "100g（お子さまカレー）",
+        "pork": 88,  "beef": None, "hayashi_niku": None,          "hayashi_tama": None,
+        "tobikara": None,
+        "mashi_pork": None, "mashi_beef": None, "mashi_hayashi": None, "tobikara_mashi": None,
+        "mashimashi_pork": None, "mashimashi_beef": None, "mashimashi_hayashi": None, "tobikara_mashimashi": None,
+        "sara_normal": "スモール皿", "sara_tejikomi": "スモール皿", "sara_mashi": None,
+    },
+    {
+        "rice_g": 150, "label": "150g",
+        "pork": 154, "beef": 138, "hayashi_niku": "3～4個(約16g)", "hayashi_tama": 140,
+        "tobikara": "0.7杯",
+        "mashi_pork": 242, "mashi_beef": 226, "mashi_hayashi": 228, "tobikara_mashi": None,
+        "mashimashi_pork": 330, "mashimashi_beef": 314, "mashimashi_hayashi": 316, "tobikara_mashimashi": None,
+        "sara_normal": "スモール皿", "sara_tejikomi": "スモール皿またはカレー皿(フチ線あり)", "sara_mashi": "普通皿",
+    },
+    {
+        "rice_g": 200, "label": "200g",
+        "pork": 176, "beef": 158, "hayashi_niku": "3～5個(約18g)", "hayashi_tama": 160,
+        "tobikara": "0.8杯",
+        "mashi_pork": 264, "mashi_beef": 246, "mashi_hayashi": 248, "tobikara_mashi": None,
+        "mashimashi_pork": 352, "mashimashi_beef": 334, "mashimashi_hayashi": 336, "tobikara_mashimashi": None,
+        "sara_normal": "カレー皿(フチ線あり)", "sara_tejikomi": None, "sara_mashi": "普通皿",
+    },
+    {
+        "rice_g": 250, "label": "250g",
+        "pork": 220, "beef": 197, "hayashi_niku": "4～6個(約23g)", "hayashi_tama": 200,
+        "tobikara": "1杯（基準）",
+        "mashi_pork": 308, "mashi_beef": 285, "mashi_hayashi": 288, "tobikara_mashi": None,
+        "mashimashi_pork": 396, "mashimashi_beef": 373, "mashimashi_hayashi": 376, "tobikara_mashimashi": None,
+        "sara_normal": "普通皿", "sara_tejikomi": None, "sara_mashi": "中間皿",
+    },
+    {
+        "rice_g": 300, "label": "300g（普通盛）",
+        "pork": 220, "beef": 197, "hayashi_niku": "4～6個(約23g)", "hayashi_tama": 200,
+        "tobikara": "1杯（基準）",
+        "mashi_pork": 308, "mashi_beef": 285, "mashi_hayashi": 288, "tobikara_mashi": None,
+        "mashimashi_pork": 396, "mashimashi_beef": 373, "mashimashi_hayashi": 376, "tobikara_mashimashi": None,
+        "sara_normal": "普通皿", "sara_tejikomi": None, "sara_mashi": "中間皿",
+    },
+    {
+        "rice_g": 350, "label": "350g",
+        "pork": 290, "beef": 262, "hayashi_niku": "5～7個(約28g)", "hayashi_tama": 265,
+        "tobikara": "1.3杯",
+        "mashi_pork": 378, "mashi_beef": 350, "mashi_hayashi": 353, "tobikara_mashi": None,
+        "mashimashi_pork": 466, "mashimashi_beef": 438, "mashimashi_hayashi": 441, "tobikara_mashimashi": None,
+        "sara_normal": "普通皿", "sara_tejikomi": None, "sara_mashi": "中間皿",
+    },
+    {
+        "rice_g": 400, "label": "400g",
+        "pork": 290, "beef": 262, "hayashi_niku": "5～7個(約28g)", "hayashi_tama": 265,
+        "tobikara": "1.3杯",
+        "mashi_pork": 378, "mashi_beef": 350, "mashi_hayashi": 353, "tobikara_mashi": None,
+        "mashimashi_pork": 466, "mashimashi_beef": 438, "mashimashi_hayashi": 441, "tobikara_mashimashi": None,
+        "sara_normal": "普通皿", "sara_tejikomi": None, "sara_mashi": "中間皿",
+    },
+    {
+        "rice_g": 500, "label": "500g",
+        "pork": 360, "beef": 328, "hayashi_niku": "6～8個(約32g)", "hayashi_tama": 330,
+        "tobikara": "1.6杯",
+        "mashi_pork": 448, "mashi_beef": 416, "mashi_hayashi": 418, "tobikara_mashi": None,
+        "mashimashi_pork": 536, "mashimashi_beef": 504, "mashimashi_hayashi": 506, "tobikara_mashimashi": None,
+        "sara_normal": "中間皿", "sara_tejikomi": None, "sara_mashi": "大皿",
+    },
+    {
+        "rice_g": 600, "label": "600g",
+        "pork": 440, "beef": 403, "hayashi_niku": "7～9個(約37g)", "hayashi_tama": 400,
+        "tobikara": "2杯",
+        "mashi_pork": 528, "mashi_beef": 491, "mashi_hayashi": 488, "tobikara_mashi": "0.4杯",
+        "mashimashi_pork": 616, "mashimashi_beef": 579, "mashimashi_hayashi": 576, "tobikara_mashimashi": "0.8杯",
+        "sara_normal": None, "sara_tejikomi": None, "sara_mashi": "大皿",
+    },
+    {
+        "rice_g": 700, "label": "700g",
+        "pork": 484, "beef": 442, "hayashi_niku": "8～10個(約42g)", "hayashi_tama": 440,
+        "tobikara": "2.2杯",
+        "mashi_pork": 572, "mashi_beef": 530, "mashi_hayashi": 528, "tobikara_mashi": None,
+        "mashimashi_pork": 660, "mashimashi_beef": 618, "mashimashi_hayashi": 616, "tobikara_mashimashi": None,
+        "sara_normal": None, "sara_tejikomi": None, "sara_mashi": "大皿",
+    },
+    {
+        "rice_g": 800, "label": "800g",
+        "pork": 528, "beef": 482, "hayashi_niku": "9～11個(約46g)", "hayashi_tama": 480,
+        "tobikara": "2.4杯",
+        "mashi_pork": 616, "mashi_beef": 570, "mashi_hayashi": 568, "tobikara_mashi": None,
+        "mashimashi_pork": 704, "mashimashi_beef": 658, "mashimashi_hayashi": 656, "tobikara_mashimashi": None,
+        "sara_normal": None, "sara_tejikomi": None, "sara_mashi": "大皿",
+    },
+    {
+        "rice_g": 900, "label": "900g",
+        "pork": 572, "beef": 521, "hayashi_niku": "11個(約51g)",   "hayashi_tama": 520,
+        "tobikara": "2.6杯",
+        "mashi_pork": 660, "mashi_beef": 609, "mashi_hayashi": 608, "tobikara_mashi": None,
+        "mashimashi_pork": 748, "mashimashi_beef": 697, "mashimashi_hayashi": 696, "tobikara_mashimashi": None,
+        "sara_normal": None, "sara_tejikomi": None, "sara_mashi": "大皿",
+    },
+    {
+        "rice_g": 1000, "label": "1,000g",
+        "pork": 650, "beef": 595, "hayashi_niku": "12個(約55g)",   "hayashi_tama": 590,
+        "tobikara": "3杯",
+        "mashi_pork": 738, "mashi_beef": 683, "mashi_hayashi": 678, "tobikara_mashi": None,
+        "mashimashi_pork": 826, "mashimashi_beef": 771, "mashimashi_hayashi": 766, "tobikara_mashimashi": None,
+        "sara_normal": "大皿", "sara_tejikomi": "大皿", "sara_mashi": "大皿",
+    },
+    {
+        "rice_g": 1100, "label": "1,100g",
+        "pork": 650, "beef": 595, "hayashi_niku": "12個(約55g)",   "hayashi_tama": 590,
+        "tobikara": "3杯",
+        "mashi_pork": 738, "mashi_beef": 683, "mashi_hayashi": 678, "tobikara_mashi": None,
+        "mashimashi_pork": 826, "mashimashi_beef": 771, "mashimashi_hayashi": 766, "tobikara_mashimashi": None,
+        "sara_normal": "大皿", "sara_tejikomi": None, "sara_mashi": "大皿",
+    },
+    {
+        "rice_g": 1400, "label": "1,400g",
+        "pork": 730, "beef": 670, "hayashi_niku": "13個(約60g)",   "hayashi_tama": 660,
+        "tobikara": "3.4杯",
+        "mashi_pork": 818, "mashi_beef": 758, "mashi_hayashi": 748, "tobikara_mashi": None,
+        "mashimashi_pork": 906, "mashimashi_beef": 846, "mashimashi_hayashi": 836, "tobikara_mashimashi": None,
+        "sara_normal": "大皿", "sara_tejikomi": "大皿", "sara_mashi": "大皿",
+    },
+]
+
 def get_manual():
     data = load_json("manual.json")
     if not data.get("sections"):
@@ -354,7 +478,9 @@ def render_pdf_as_images(file_path: str, key_prefix: str = ""):
 # ─── ページヘッダー ──────────────────────────────────────────
 page_header("📋 マニュアル", "業務ルール & カレーマニュアル")
 
-tab_curry, tab_general = st.tabs(["🍛 カレーマニュアル", "📖 業務マニュアル"])
+tab_curry, tab_general, tab_sauce, tab_teisu = st.tabs([
+    "カレーマニュアル", "業務マニュアル", "ソース量表", "定数表"
+])
 
 
 # ══════════════════════════════════════════════════════════════
@@ -639,3 +765,179 @@ with tab_general:
                         st.rerun()
                 else:
                     st.success("既読済み ✅")
+
+
+# ══════════════════════════════════════════════════════════════
+# TAB 3: ソース量表
+# ══════════════════════════════════════════════════════════════
+with tab_sauce:
+    import pandas as pd
+
+    st.markdown("#### ソース量・とび辛スプーン早見表")
+    st.caption("ライス量を選択すると各ソース量が表示されます。（2026年6月4日更新）")
+
+    def _fmt(v, unit="g"):
+        return f"{v}{unit}" if v is not None else "—"
+
+    rice_labels = [r["label"] for r in SAUCE_DATA]
+    default_idx = next((i for i, r in enumerate(SAUCE_DATA) if r["rice_g"] == 300), 0)
+    selected_label = st.selectbox("ライス量", rice_labels, index=default_idx)
+    row = next(r for r in SAUCE_DATA if r["label"] == selected_label)
+
+    st.divider()
+
+    # ── 3列カード表示 ─────────────────────────────────────────
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown(
+            "<div style='background:#fff5f0;border-left:4px solid #e85d04;"
+            "padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:10px;'>"
+            "<b style='color:#e85d04;'>通常</b></div>",
+            unsafe_allow_html=True,
+        )
+        st.metric("ポーク・甘口・ベジ", _fmt(row["pork"]))
+        st.metric("ビーフ",             _fmt(row["beef"]))
+        st.metric("ハヤシ肉",           row["hayashi_niku"] or "—")
+        st.metric("ハヤシ玉ねぎ",       _fmt(row["hayashi_tama"]))
+        st.metric("とび辛スプーン",     row["tobikara"] or "—")
+
+    with col2:
+        st.markdown(
+            "<div style='background:#fff0f5;border-left:4px solid #c0392b;"
+            "padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:10px;'>"
+            "<b style='color:#c0392b;'>ソース増し</b></div>",
+            unsafe_allow_html=True,
+        )
+        st.metric("ポーク・甘口・ベジ", _fmt(row["mashi_pork"]))
+        st.metric("ビーフ",             _fmt(row["mashi_beef"]))
+        st.metric("ハヤシ",             _fmt(row["mashi_hayashi"]))
+        if row["tobikara_mashi"]:
+            st.metric("とび辛（追加分）", row["tobikara_mashi"])
+
+    with col3:
+        st.markdown(
+            "<div style='background:#f0f5ff;border-left:4px solid #2980b9;"
+            "padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:10px;'>"
+            "<b style='color:#2980b9;'>ソース増し増し</b></div>",
+            unsafe_allow_html=True,
+        )
+        st.metric("ポーク・甘口・ベジ", _fmt(row["mashimashi_pork"]))
+        st.metric("ビーフ",             _fmt(row["mashimashi_beef"]))
+        st.metric("ハヤシ",             _fmt(row["mashimashi_hayashi"]))
+        if row["tobikara_mashimashi"]:
+            st.metric("とび辛（追加分）", row["tobikara_mashimashi"])
+
+    # ── 使用皿 ───────────────────────────────────────────────
+    st.divider()
+    sara_parts = []
+    if row["sara_normal"]:   sara_parts.append(f"通常: **{row['sara_normal']}**")
+    if row["sara_tejikomi"]: sara_parts.append(f"手仕込: **{row['sara_tejikomi']}**")
+    if row["sara_mashi"]:    sara_parts.append(f"ソース増し: **{row['sara_mashi']}**")
+    if sara_parts:
+        st.markdown("使用皿 — " + "　／　".join(sara_parts))
+    else:
+        st.markdown("使用皿 — （要確認）")
+
+    # ── 全データ一覧 ─────────────────────────────────────────
+    st.divider()
+    with st.expander("全データ一覧表を表示"):
+        df_sauce = pd.DataFrame([{
+            "ライス量":           r["label"],
+            "ポーク系(g)":       r["pork"]          or "—",
+            "ビーフ(g)":         r["beef"]          or "—",
+            "ハヤシ肉":          r["hayashi_niku"]  or "—",
+            "ハヤシ玉(g)":       r["hayashi_tama"]  or "—",
+            "とび辛":            r["tobikara"]      or "—",
+            "増し[ポーク系](g)": r["mashi_pork"]    or "—",
+            "増し[ビーフ](g)":   r["mashi_beef"]    or "—",
+            "増し[ハヤシ](g)":   r["mashi_hayashi"] or "—",
+            "増し増し[ポーク](g)":r["mashimashi_pork"]    or "—",
+            "増し増し[ビーフ](g)":r["mashimashi_beef"]    or "—",
+            "増し増し[ハヤシ](g)":r["mashimashi_hayashi"] or "—",
+            "皿(通常)":          r["sara_normal"]   or "—",
+            "皿(ソース増し)":    r["sara_mashi"]    or "—",
+        } for r in SAUCE_DATA])
+        st.dataframe(df_sauce, use_container_width=True, hide_index=True)
+
+    st.caption("※ ソース量の誤差は各規定量の+10g以内とする。")
+
+
+# ══════════════════════════════════════════════════════════════
+# TAB 4: 定数表
+# ══════════════════════════════════════════════════════════════
+with tab_teisu:
+    import pandas as pd
+
+    st.markdown("#### 定数表")
+    st.caption("仕込みや発注の定数を自由に記録・管理できます。行は「＋」ボタンで追加、保存ボタンで確定されます。")
+
+    def get_teisu():
+        data = load_json("teisu_table.json", {})
+        if not data.get("columns"):
+            return {"columns": ["品目", "規定量", "単位", "備考"], "rows": []}
+        return data
+
+    teisu     = get_teisu()
+    t_columns = teisu.get("columns", ["品目", "規定量", "単位", "備考"])
+    t_rows    = teisu.get("rows", [])
+
+    # ── 管理者: 列の追加・削除 ──────────────────────────────
+    if is_manager(user):
+        with st.expander("列の管理（管理者）"):
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.markdown("**列を追加**")
+                new_col_name = st.text_input("列名", key="teisu_new_col")
+                if st.button("追加", key="teisu_add_col", type="primary"):
+                    if new_col_name and new_col_name not in t_columns:
+                        t_columns.append(new_col_name)
+                        for r in t_rows:
+                            r.setdefault(new_col_name, "")
+                        save_json("teisu_table.json", {"columns": t_columns, "rows": t_rows})
+                        st.success(f"「{new_col_name}」列を追加しました。")
+                        st.rerun()
+                    elif new_col_name in t_columns:
+                        st.warning("同じ列名がすでにあります。")
+            with col_b:
+                st.markdown("**列を削除**")
+                if len(t_columns) > 1:
+                    del_col_name = st.selectbox("削除する列", t_columns, key="teisu_del_col")
+                    if st.button("削除", key="teisu_del_col_btn"):
+                        t_columns = [c for c in t_columns if c != del_col_name]
+                        for r in t_rows:
+                            r.pop(del_col_name, None)
+                        save_json("teisu_table.json", {"columns": t_columns, "rows": t_rows})
+                        st.success(f"「{del_col_name}」列を削除しました。")
+                        st.rerun()
+                else:
+                    st.info("最低1列は必要です。")
+
+    # ── 編集テーブル ────────────────────────────────────────
+    if t_rows:
+        df_teisu = pd.DataFrame(t_rows, columns=t_columns)
+        # 列が欠けている場合は空文字で補完
+        for c in t_columns:
+            if c not in df_teisu.columns:
+                df_teisu[c] = ""
+        df_teisu = df_teisu[t_columns]
+    else:
+        df_teisu = pd.DataFrame(columns=t_columns)
+
+    edited = st.data_editor(
+        df_teisu,
+        num_rows="dynamic",
+        use_container_width=True,
+        hide_index=True,
+        column_config={c: st.column_config.TextColumn(c, width="medium") for c in t_columns},
+        key="teisu_editor",
+    )
+
+    if st.button("保存", type="primary", key="teisu_save"):
+        new_rows = [
+            row for row in edited.to_dict("records")
+            if any(str(v).strip() for v in row.values())
+        ]
+        save_json("teisu_table.json", {"columns": t_columns, "rows": new_rows})
+        st.success("保存しました！")
+        st.rerun()
