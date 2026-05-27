@@ -301,11 +301,48 @@ if role != "kenshu":
         with st.expander("卒業チェックリストの項目編集（管理者）"):
             st.caption("研修卒業に必要な項目を管理します。変更は全研修生に即時反映されます。")
 
+            # エディタ用スタイル
+            st.markdown("""
+<style>
+.cat-header {
+    background: linear-gradient(90deg, #fff3ee, #fff);
+    border-left: 5px solid #e85d04;
+    padding: 10px 16px;
+    border-radius: 0 10px 10px 0;
+    margin: 20px 0 6px;
+}
+.cat-header span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #e85d04;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.items-label {
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 600;
+    margin: 10px 0 4px 4px;
+}
+.new-cat-section {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 12px;
+}
+</style>
+""", unsafe_allow_html=True)
+
             tmpl = load_json("graduation_template.json", DEFAULT_GRADUATION_TEMPLATE)
             cats = tmpl.get("categories", DEFAULT_GRADUATION_TEMPLATE["categories"])
 
             for ci, cat in enumerate(cats):
-                # カテゴリ名 + 削除ボタン
+                # ─ カテゴリヘッダー ─────────────────────────────
+                st.markdown(
+                    f'<div class="cat-header"><span>カテゴリ {ci + 1}</span></div>',
+                    unsafe_allow_html=True,
+                )
                 col_name, col_del = st.columns([10, 1])
                 with col_name:
                     new_cat_name = st.text_input(
@@ -320,10 +357,14 @@ if role != "kenshu":
                         save_json("graduation_template.json", {"categories": cats})
                         st.rerun()
 
-                # カテゴリ内の項目
+                # ─ チェック項目 ──────────────────────────────────
+                st.markdown('<div class="items-label">チェック項目</div>',
+                            unsafe_allow_html=True)
+
                 new_items = []
                 for ii, item in enumerate(cat["items"]):
-                    col1, col2 = st.columns([11, 1])
+                    # 字下げ用スペーサー列
+                    _, col1, col2 = st.columns([0.3, 10.7, 1])
                     with col1:
                         new_item = st.text_input(
                             "", value=item,
@@ -337,28 +378,35 @@ if role != "kenshu":
                             st.rerun()
                     new_items.append(new_item)
 
-                add_item = st.text_input(
-                    "項目を追加", placeholder="新しい項目を入力して Enter",
-                    key=f"tmpl_add_{ci}",
-                )
+                # 項目追加行
+                _, col_add = st.columns([0.3, 11.7])
+                with col_add:
+                    add_item = st.text_input(
+                        "", placeholder="＋ 項目を追加（入力してEnter）",
+                        key=f"tmpl_add_{ci}",
+                        label_visibility="collapsed",
+                    )
                 if add_item:
                     new_items.append(add_item)
 
                 cats[ci]["name"]  = new_cat_name
                 cats[ci]["items"] = new_items
-                st.divider()
 
-            # カテゴリを新規追加
+            # ─ カテゴリ新規追加 ──────────────────────────────────
+            st.markdown('<div class="new-cat-section">', unsafe_allow_html=True)
             new_cat_input = st.text_input(
-                "カテゴリを追加", placeholder="新しいカテゴリ名を入力して Enter",
+                "カテゴリを追加",
+                placeholder="新しいカテゴリ名を入力して Enter",
                 key="tmpl_new_cat",
             )
+            st.markdown('</div>', unsafe_allow_html=True)
             if new_cat_input:
                 import uuid
                 cats.append({"id": uuid.uuid4().hex[:8], "name": new_cat_input, "items": []})
                 save_json("graduation_template.json", {"categories": cats})
                 st.rerun()
 
+            st.write("")
             if st.button("変更を保存", type="primary", key="save_tmpl"):
                 save_json("graduation_template.json", {"categories": cats})
                 st.success("保存しました！")
