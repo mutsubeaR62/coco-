@@ -12,7 +12,7 @@ require_admin()
 
 page_header("⚙️ 管理者設定", "メンバー管理・進捗確認")
 
-tab_members, tab_progress, tab_pw, tab_store = st.tabs(["👥 メンバー管理", "📊 進捗確認", "🔑 パスワード変更", "🏪 店舗設定"])
+tab_members, tab_progress, tab_pw, tab_store = st.tabs(["メンバー管理", "進捗確認", "パスワード変更", "店舗設定"])
 
 # ════ メンバー管理 ══════════════════════════════════════════════
 with tab_members:
@@ -27,13 +27,13 @@ with tab_members:
 
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
-        st.metric("👑 管理者", counts.get("admin", 0))
+        st.metric("管理者", counts.get("admin", 0))
     with c2:
-        st.metric("🔑 代行", counts.get("daiko", 0))
+        st.metric("代行", counts.get("daiko", 0))
     with c3:
-        st.metric("🏪 メイト", counts.get("mate", 0) + counts.get("staff", 0))
+        st.metric("メイト", counts.get("mate", 0) + counts.get("staff", 0))
     with c4:
-        st.metric("🌱 研修", counts.get("kenshu", 0) + counts.get("new", 0))
+        st.metric("研修", counts.get("kenshu", 0) + counts.get("new", 0))
     with c5:
         st.metric("合計", len(users))
 
@@ -118,7 +118,7 @@ with tab_members:
                         st.rerun()
 
     st.divider()
-    st.markdown("#### ➕ 新しいメンバーを追加")
+    st.markdown("#### 新しいメンバーを追加")
     with st.form("add_member"):
         col1, col2 = st.columns(2)
         with col1:
@@ -276,7 +276,7 @@ with tab_store:
         s_tel    = st.text_input("電話番号（任意）",
                                   value=current_store.get("tel", ""),
                                   placeholder="例: 0565-XX-XXXX")
-        if st.form_submit_button("💾 保存する", type="primary", use_container_width=True):
+        if st.form_submit_button("保存する", type="primary", use_container_width=True):
             save_store_settings(
                 store_name=s_name,
                 store_branch=s_branch,

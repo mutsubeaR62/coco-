@@ -64,18 +64,18 @@ stamp_count = len(earned_stamps)
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    st.metric("🎯 クイズ最高得点", f"{best_score}/10", help="クイズの最高得点")
+    st.metric("クイズ最高得点", f"{best_score}/10", help="クイズの最高得点")
 with c2:
-    st.metric("✅ チェックリスト完了", f"{total_cl}回", help="チェックリストを完了した回数")
+    st.metric("チェックリスト完了", f"{total_cl}回", help="チェックリストを完了した回数")
 with c3:
-    st.metric("📚 マニュアル既読", f"{manual_read}セクション", help="読んだマニュアルの数")
+    st.metric("マニュアル既読", f"{manual_read}セクション", help="読んだマニュアルの数")
 with c4:
-    st.metric("🏅 スタンプ", f"{stamp_count}/{len(STAMPS)}個", help="獲得したスタンプ数")
+    st.metric("スタンプ", f"{stamp_count}/{len(STAMPS)}個", help="獲得したスタンプ数")
 
 st.divider()
 
 # ─── スタンプ一覧 ─────────────────────────────────────────────
-st.subheader("🏅 スタンプコレクション")
+st.subheader("スタンプコレクション")
 st.caption("達成するともらえるスタンプを集めよう！")
 
 stamp_html = '<div class="stamp-grid">'
@@ -94,7 +94,7 @@ st.markdown(stamp_html, unsafe_allow_html=True)
 st.divider()
 
 # ─── クイックアクセス ─────────────────────────────────────────
-st.subheader("📌 クイックアクセス")
+st.subheader("クイックアクセス")
 
 links = [
     ("📋", "マニュアル",      "pages/manual.py"),
@@ -150,18 +150,18 @@ for row_start in range(0, n, row_size):
 # ─── ロール別メッセージ ───────────────────────────────────────
 st.divider()
 if role == "kenshu":
-    st.info("🌱 **研修中の方へ** — まずは「マニュアル」と「新人研修」から始めてみよう！わからないことがあれば先輩に遠慮なく聞いてね。")
+    st.info("**研修中の方へ** — まずは「マニュアル」と「新人研修」から始めてみよう！わからないことがあれば先輩に遠慮なく聞いてね。")
 elif is_manager(user):
     _all = get_all_users()
     _kenshu = [u for u in _all if u.get("role") == "kenshu"]
-    st.info(f"⚙️ **管理者メニュー** — 現在の研修中メンバー: {len(_kenshu)}名。「管理者設定」からメンバー管理や進捗確認ができます。")
+    st.info(f"**管理者メニュー** — 現在の研修中メンバー: {len(_kenshu)}名。「管理者設定」からメンバー管理や進捗確認ができます。")
 elif role == "mate":
-    st.info("👍 **メイトの皆さんへ** — 発注やチェックリストをこのアプリで管理できます。研修メンバーのサポートもよろしく！")
+    st.info("**メイトの皆さんへ** — 発注やチェックリストをこのアプリで管理できます。研修メンバーのサポートもよろしく！")
 else:
-    st.info("👍 お疲れ様です！今日もよろしくお願いします。")
+    st.info("お疲れ様です！今日もよろしくお願いします。")
 
 # ─── アプリの説明 ─────────────────────────────────────────────
-with st.expander("📖 このアプリの使い方"):
+with st.expander("このアプリの使い方"):
     st.markdown("""
 | ページ | 内容 |
 |--------|------|

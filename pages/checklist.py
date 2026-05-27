@@ -17,7 +17,7 @@ _is_manager = is_manager(user)
 
 page_header("✅ チェックリスト", "作業確認 & ステップアップ")
 
-tab_daily, tab_stepup = st.tabs(["📋 日常チェックリスト", "📈 ステップアップ表"])
+tab_daily, tab_stepup = st.tabs(["日常チェックリスト", "ステップアップ表"])
 
 # ══════════════════════════════════════════════════════════════
 # TAB1: 日常チェックリスト
@@ -164,7 +164,7 @@ with tab_daily:
         st.progress(total_done / max(total_items, 1))
         st.caption(f"全体進捗: {total_done} / {total_items} 項目完了")
     with col_reset:
-        if st.button("🔄 全リセット"):
+        if st.button("全リセット"):
             st.session_state.cl_state = {
                 cl["name"]: [False] * len(cl["items"])
                 for cl in checklists
@@ -189,7 +189,7 @@ with tab_daily:
 
             render_attachments("checklist", cl["id"])
 
-            show_why = st.toggle("💡 「なぜやるか」を表示", key=f"why_{cl_name}", value=False)
+            show_why = st.toggle("「なぜやるか」を表示", key=f"why_{cl_name}", value=False)
 
             for i, item in enumerate(items):
                 col_check, col_label = st.columns([1, 12])
@@ -212,7 +212,7 @@ with tab_daily:
 
         new_checks = st.session_state.cl_state.get(cl_name, [])
         if sum(new_checks) == len(items):
-            if st.button(f"📝 「{cl_name}」の完了を記録する",
+            if st.button(f"「{cl_name}」の完了を記録する",
                          key=f"record_{cl_name}", type="primary"):
                 prog = get_progress(username)
                 cl_hist = prog.get("checklist_completions", {})
@@ -260,12 +260,12 @@ with tab_daily:
                     if new_task != item["task"] or new_why != item.get("why", ""):
                         all_cls[ci]["items"][ii] = {"task": new_task, "why": new_why}
 
-                if st.button(f"➕ 「{cl['name']}」に項目追加", key=f"eadd_{ci}"):
+                if st.button(f"「{cl['name']}」に項目追加", key=f"eadd_{ci}"):
                     all_cls[ci]["items"].append({"task": "新しい項目", "why": "なぜやるかを入力"})
                     save_json("checklists.json", {"checklists": all_cls})
                     st.rerun()
 
-            if st.button("💾 変更を保存", type="primary"):
+            if st.button("変更を保存", type="primary"):
                 save_json("checklists.json", {"checklists": all_cls})
                 st.success("保存しました！")
                 st.rerun()
@@ -323,15 +323,15 @@ with tab_stepup:
         # 編集モードトグル（管理者のみ）
         edit_mode = False
         if _is_manager:
-            edit_mode = st.toggle("✏️ 編集モード", key="stepup_edit_mode")
+            edit_mode = st.toggle("編集モード", key="stepup_edit_mode")
 
         # ── 編集モード ────────────────────────────────────────────
         if edit_mode and _is_manager:
-            st.markdown("#### 📝 ステップアップ表の項目編集")
+            st.markdown("#### ステップアップ表の項目編集")
             stepup2 = get_stepup_data()
             stages2 = stepup2.get("stages", [])
             for s_idx, stage in enumerate(stages2):
-                st.markdown(f"##### 📌 {stage['title']}")
+                st.markdown(f"##### {stage['title']}")
                 new_title  = st.text_input("ステージ名", value=stage["title"],
                                            key=f"stitle_{s_idx}")
                 new_target = st.text_input("達成目安", value=stage.get("target", ""),
@@ -355,7 +355,7 @@ with tab_stepup:
                                 save_stepup_data({"stages": stages2})
                                 st.rerun()
                         new_items.append(new_item)
-                    add_item = st.text_input("➕ 項目を追加",
+                    add_item = st.text_input("項目を追加",
                                               placeholder="新しい項目を入力",
                                               key=f"add_{s_idx}_{sec_idx}")
                     if add_item:
@@ -365,7 +365,7 @@ with tab_stepup:
                 stages2[s_idx]["title"]  = new_title
                 stages2[s_idx]["target"] = new_target
 
-                if st.button(f"💾 「{stage['title']}」を保存",
+                if st.button(f"「{stage['title']}」を保存",
                              key=f"save_s_{s_idx}", type="primary"):
                     save_stepup_data({"stages": stages2})
                     st.success("保存しました！")

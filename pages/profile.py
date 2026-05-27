@@ -23,7 +23,7 @@ me = next((u for u in all_users if u["username"] == username), user)
 # ─── CoCoスペ表示 ──────────────────────────────────────────────
 spec = get_coco_spec(me)
 
-st.markdown("### 🏅 CoCoスペ")
+st.markdown("### CoCoスペ")
 st.markdown(
     "<div style='background:white;border-radius:12px;padding:16px 20px;"
     "box-shadow:0 2px 10px rgba(0,0,0,0.08);margin-bottom:16px;'>"
@@ -67,7 +67,7 @@ else:
 st.divider()
 
 # ─── プロフィール編集 ──────────────────────────────────────────
-st.markdown("### ✏️ プロフィール編集")
+st.markdown("### プロフィール編集")
 
 with st.form("edit_profile"):
     st.markdown("**基本情報**")
@@ -109,7 +109,7 @@ with st.form("edit_profile"):
     new_sa = st.text_input("新しい答え（変更しない場合は空欄）",
                             type="password", placeholder="変更する場合のみ入力")
 
-    if st.form_submit_button("💾 保存", type="primary"):
+    if st.form_submit_button("保存", type="primary"):
         kwargs = {"name": new_name, "birthday": new_birthday,
                   "secret_question": new_sq}
         if new_sa:
@@ -128,7 +128,7 @@ st.divider()
 
 # ─── 他メンバーのCoCoスペ一覧（管理者のみ） ─────────────────────
 if is_admin:
-    st.markdown("### 📋 全メンバーのCoCoスペ一覧")
+    st.markdown("### 全メンバーのCoCoスペ一覧")
 
     rows = []
     for u in all_users:
@@ -145,7 +145,7 @@ if is_admin:
     st.dataframe(df, use_container_width=True, hide_index=True)
 
     st.divider()
-    st.markdown("#### ✏️ メンバーのCoCoスペを更新")
+    st.markdown("#### メンバーのCoCoスペを更新")
     user_opts = {u["name"]: u["username"] for u in all_users}
     target_name = st.selectbox("対象メンバー", list(user_opts.keys()), key="spec_target")
     target_uname = user_opts[target_name]
