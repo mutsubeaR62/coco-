@@ -337,6 +337,19 @@ if role != "kenshu":
             tmpl = load_json("graduation_template.json", DEFAULT_GRADUATION_TEMPLATE)
             cats = tmpl.get("categories", DEFAULT_GRADUATION_TEMPLATE["categories"])
 
+            def _clear_tmpl_state(from_ci=0, from_ii=0, num_cats=50, max_items=50):
+                """削除によってずれるウィジェットのセッションステートをクリアする"""
+                for cj in range(from_ci, num_cats):
+                    if f"catname_{cj}" in st.session_state:
+                        del st.session_state[f"catname_{cj}"]
+                    start_ii = from_ii if cj == from_ci else 0
+                    for jj in range(start_ii, max_items):
+                        for prefix in (f"tmpl_{cj}_{jj}", f"tmpl_del_{cj}_{jj}"):
+                            if prefix in st.session_state:
+                                del st.session_state[prefix]
+                    if f"tmpl_add_{cj}" in st.session_state:
+                        del st.session_state[f"tmpl_add_{cj}"]
+
             for ci, cat in enumerate(cats):
                 # ─ カテゴリヘッダー ─────────────────────────────
                 st.markdown(
@@ -353,8 +366,10 @@ if role != "kenshu":
                     st.write("")
                     if st.button("🗑️", key=f"cat_del_{ci}",
                                  help="このカテゴリごと削除"):
+                        num_cats_before = len(cats)
                         cats.pop(ci)
                         save_json("graduation_template.json", {"categories": cats})
+                        _clear_tmpl_state(from_ci=ci, num_cats=num_cats_before)
                         st.rerun()
 
                 # ─ チェック項目 ──────────────────────────────────
@@ -373,8 +388,12 @@ if role != "kenshu":
                         )
                     with col2:
                         if st.button("🗑️", key=f"tmpl_del_{ci}_{ii}"):
+                            original_len = len(cats[ci]["items"])
                             cats[ci]["items"].pop(ii)
                             save_json("graduation_template.json", {"categories": cats})
+                            # 削除した位置以降のセッションステートをクリア
+                            _clear_tmpl_state(from_ci=ci, from_ii=ii,
+                                              num_cats=ci + 1, max_items=original_len)
                             st.rerun()
                     new_items.append(new_item)
 
