@@ -52,7 +52,9 @@ if "user" not in st.session_state:
 try:
     import extra_streamlit_components as stx
     _cm = stx.CookieManager(key="main_cm")
-    if st.session_state.user is None:
+    # ログアウト直後はCookie復元をスキップ（フラグを消費）
+    _just_logged_out = st.session_state.pop("_logout", False)
+    if st.session_state.user is None and not _just_logged_out:
         _saved = _cm.get("coco_login")
         if _saved:
             _u = get_user_by_username(_saved)

@@ -337,18 +337,7 @@ if role != "kenshu":
             tmpl = load_json("graduation_template.json", DEFAULT_GRADUATION_TEMPLATE)
             cats = tmpl.get("categories", DEFAULT_GRADUATION_TEMPLATE["categories"])
 
-            def _clear_tmpl_state(from_ci=0, from_ii=0, num_cats=50, max_items=50):
-                """削除によってずれるウィジェットのセッションステートをクリアする"""
-                for cj in range(from_ci, num_cats):
-                    if f"catname_{cj}" in st.session_state:
-                        del st.session_state[f"catname_{cj}"]
-                    start_ii = from_ii if cj == from_ci else 0
-                    for jj in range(start_ii, max_items):
-                        for prefix in (f"tmpl_{cj}_{jj}", f"tmpl_del_{cj}_{jj}"):
-                            if prefix in st.session_state:
-                                del st.session_state[prefix]
-                    if f"tmpl_add_{cj}" in st.session_state:
-                        del st.session_state[f"tmpl_add_{cj}"]
+            import pandas as pd
 
             for ci, cat in enumerate(cats):
                 # ─ カテゴリヘッダー ─────────────────────────────
@@ -369,47 +358,32 @@ if role != "kenshu":
                         num_cats_before = len(cats)
                         cats.pop(ci)
                         save_json("graduation_template.json", {"categories": cats})
-                        _clear_tmpl_state(from_ci=ci, num_cats=num_cats_before)
+                        # カテゴリ削除後のセッションステートをクリア
+                        for cj in range(ci, num_cats_before):
+                            for k in (f"catname_{cj}", f"items_editor_{cj}", f"cat_del_{cj}"):
+                                st.session_state.pop(k, None)
                         st.rerun()
 
-                # ─ チェック項目 ──────────────────────────────────
-                st.markdown('<div class="items-label">チェック項目</div>',
+                # ─ チェック項目（data_editor で行追加・削除） ──────
+                st.markdown('<div class="items-label">チェック項目（左端のチェックで行を選択 → ゴミ箱で削除 / 最終行の下に新しい行を追加）</div>',
                             unsafe_allow_html=True)
 
-                new_items = []
-                for ii, item in enumerate(cat["items"]):
-                    # 字下げ用スペーサー列
-                    _, col1, col2 = st.columns([0.3, 10.7, 1])
-                    with col1:
-                        new_item = st.text_input(
-                            "", value=item,
-                            key=f"tmpl_{ci}_{ii}",
-                            label_visibility="collapsed",
-                        )
-                    with col2:
-                        if st.button("🗑️", key=f"tmpl_del_{ci}_{ii}"):
-                            original_len = len(cats[ci]["items"])
-                            cats[ci]["items"].pop(ii)
-                            save_json("graduation_template.json", {"categories": cats})
-                            # 削除した位置以降のセッションステートをクリア
-                            _clear_tmpl_state(from_ci=ci, from_ii=ii,
-                                              num_cats=ci + 1, max_items=original_len)
-                            st.rerun()
-                    new_items.append(new_item)
-
-                # 項目追加行
-                _, col_add = st.columns([0.3, 11.7])
-                with col_add:
-                    add_item = st.text_input(
-                        "", placeholder="＋ 項目を追加（入力してEnter）",
-                        key=f"tmpl_add_{ci}",
-                        label_visibility="collapsed",
-                    )
-                if add_item:
-                    new_items.append(add_item)
-
+                items_df = pd.DataFrame({"項目": cat["items"] if cat["items"] else []})
+                edited_df = st.data_editor(
+                    items_df,
+                    num_rows="dynamic",
+                    use_container_width=True,
+                    hide_index=True,
+                    key=f"items_editor_{ci}",
+                    column_config={
+                        "項目": st.column_config.TextColumn("項目", width="large"),
+                    },
+                )
                 cats[ci]["name"]  = new_cat_name
-                cats[ci]["items"] = new_items
+                cats[ci]["items"] = [
+                    str(r).strip() for r in edited_df["項目"].tolist()
+                    if r is not None and str(r).strip()
+                ]
 
             # ─ カテゴリ新規追加 ──────────────────────────────────
             st.markdown('<div class="new-cat-section">', unsafe_allow_html=True)

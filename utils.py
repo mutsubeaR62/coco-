@@ -576,13 +576,14 @@ section[data-testid="stSidebar"] .stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
     if st.sidebar.button("🚪 ログアウト", use_container_width=True):
+        st.session_state.user = None
+        st.session_state["_logout"] = True   # Cookie復元をブロック
         try:
             import extra_streamlit_components as stx
-            cm = stx.CookieManager(key="logout_cm")
+            cm = stx.CookieManager(key="main_cm")   # ログイン時と同じキー
             cm.delete("coco_login")
         except Exception:
             pass
-        st.session_state.user = None
         st.rerun()
 
 def page_header(title, subtitle=""):
