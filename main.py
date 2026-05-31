@@ -11,6 +11,42 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 apply_theme()
+
+# ── PWA メタタグ ──────────────────────────────────────────────
+st.markdown("""
+<script>
+(function() {
+    // manifest リンクを head に動的追加
+    if (!document.querySelector('link[rel="manifest"]')) {
+        var m = document.createElement('link');
+        m.rel = 'manifest';
+        m.href = '/app/static/manifest.json';
+        document.head.appendChild(m);
+    }
+    // iOS 向けメタタグ
+    var metas = [
+        ['apple-mobile-web-app-capable',        'yes'],
+        ['apple-mobile-web-app-status-bar-style','black-translucent'],
+        ['apple-mobile-web-app-title',           'CoCo壱番屋'],
+        ['theme-color',                          '#e85d04'],
+    ];
+    metas.forEach(function(p) {
+        if (!document.querySelector('meta[name="' + p[0] + '"]')) {
+            var mt = document.createElement('meta');
+            mt.name = p[0]; mt.content = p[1];
+            document.head.appendChild(mt);
+        }
+    });
+    // iOS アイコン
+    if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+        var ic = document.createElement('link');
+        ic.rel = 'apple-touch-icon';
+        ic.href = '/app/static/icon-192.png';
+        document.head.appendChild(ic);
+    }
+})();
+</script>
+""", unsafe_allow_html=True)
 init_default_users()
 
 # サイドバー最上部にロゴ（大きめに表示）
