@@ -13,38 +13,26 @@ st.set_page_config(
 apply_theme()
 
 # ── PWA メタタグ ──────────────────────────────────────────────
-st.markdown("""
+_ICON_URL = "https://raw.githubusercontent.com/mutsubeaR62/coco-/main/static/icon-192.png"
+st.markdown(f"""
+<link rel="apple-touch-icon" href="{_ICON_URL}">
 <script>
-(function() {
-    // manifest リンクを head に動的追加
-    if (!document.querySelector('link[rel="manifest"]')) {
-        var m = document.createElement('link');
-        m.rel = 'manifest';
-        m.href = '/app/static/manifest.json';
-        document.head.appendChild(m);
-    }
-    // iOS 向けメタタグ
-    var metas = [
-        ['apple-mobile-web-app-capable',        'yes'],
-        ['apple-mobile-web-app-status-bar-style','black-translucent'],
-        ['apple-mobile-web-app-title',           'CoCo壱番屋'],
-        ['theme-color',                          '#e85d04'],
-    ];
-    metas.forEach(function(p) {
-        if (!document.querySelector('meta[name="' + p[0] + '"]')) {
-            var mt = document.createElement('meta');
-            mt.name = p[0]; mt.content = p[1];
-            document.head.appendChild(mt);
-        }
-    });
-    // iOS アイコン
-    if (!document.querySelector('link[rel="apple-touch-icon"]')) {
-        var ic = document.createElement('link');
-        ic.rel = 'apple-touch-icon';
-        ic.href = '/app/static/icon-192.png';
-        document.head.appendChild(ic);
-    }
-})();
+(function() {{
+    var ICON = "{_ICON_URL}";
+    function setHead(tag, attrs) {{
+        var sel = tag + '[' + Object.keys(attrs)[0] + '="' + Object.values(attrs)[0] + '"]';
+        if (document.querySelector(sel)) return;
+        var el = document.createElement(tag);
+        Object.entries(attrs).forEach(function(p) {{ el.setAttribute(p[0], p[1]); }});
+        document.head.appendChild(el);
+    }}
+    setHead('link', {{rel:'manifest',        href:'/app/static/manifest.json'}});
+    setHead('link', {{rel:'apple-touch-icon', href:ICON}});
+    setHead('meta', {{name:'apple-mobile-web-app-capable',         content:'yes'}});
+    setHead('meta', {{name:'apple-mobile-web-app-status-bar-style', content:'black-translucent'}});
+    setHead('meta', {{name:'apple-mobile-web-app-title',            content:'CoCo壱番屋'}});
+    setHead('meta', {{name:'theme-color',                           content:'#e85d04'}});
+}})();
 </script>
 """, unsafe_allow_html=True)
 init_default_users()
