@@ -522,13 +522,10 @@ def award_stamps(username):
 # ─── Streamlit ヘルパー ───────────────────────────────────────
 def apply_theme():
     st.markdown(THEME_CSS, unsafe_allow_html=True)
-    # Streamlit デフォルトUI（フッター・管理ボタン等）を非表示
+    # フッターのみ非表示
     st.markdown("""
 <style>
-footer                             { display: none !important; }
-[data-testid="stToolbar"]          { display: none !important; }
-[data-testid="manage-app-button"]  { display: none !important; }
-.stDeployButton                    { display: none !important; }
+footer { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
