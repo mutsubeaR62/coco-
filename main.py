@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
-from utils import apply_theme, init_default_users, sidebar_user, ROLE_LABELS, get_user_by_username
+from utils import apply_theme, init_default_users, sidebar_user, ROLE_LABELS, get_user_by_username, prefetch_all_json
 
 st.set_page_config(
     page_title="CoCo壱番屋 スタッフアプリ",
@@ -93,6 +93,10 @@ try:
         st.session_state["_cookie_checked"] = False
 except Exception:
     pass
+
+# ログイン済みなら全データを一括プリフェッチ（初回のみ・以降はキャッシュから）
+if st.session_state.user is not None:
+    prefetch_all_json()
 
 if st.session_state.user is None:
     pg = st.navigation(
