@@ -537,6 +537,66 @@ def reset_password(username, new_password):
             u["password"] = _hash(new_password)
     save_json("users.json", data)
 
+def change_username(old_username: str, new_username: str):
+    """ユーザーIDを変更し、関連データのキーも移行する。
+    戻り値: (True, None) or (False, エラーメッセージ)
+    """
+    new_username = new_username.strip()
+    if not new_username:
+        return False, "IDを入力してください。"
+    if new_username == old_username:
+        return False, "現在と同じIDです。"
+    # 英数字・アンダースコアのみ許可
+    import re as _re
+    if not _re.match(r'^[a-zA-Z0-9_]+$', new_username):
+        return False, "IDは半角英数字・アンダースコアのみ使用できます。"
+
+    data = load_json("users.json", {"users": []})
+    # 重複チェック
+    if any(u["username"] == new_username for u in data["users"]):
+        return False, f"「{new_username}」はすでに使われています。"
+    # 存在チェック
+    if not any(u["username"] == old_username for u in data["users"]):
+        return False, "対象ユーザーが見つかりません。"
+
+    save_snapshot(f"ID変更前バックアップ（{old_username} → {new_username}）")
+
+    # users.json のキー変更
+    for u in data["users"]:
+        if u["username"] == old_username:
+            u["username"] = new_username
+            break
+    save_json("users.json", data)
+
+    # progress.json のキー移行
+    prog = load_json(store_path("progress.json"), {})
+    if old_username in prog:
+        prog[new_username] = prog.pop(old_username)
+        try:
+            save_json(store_path("progress.json"), prog)
+        except Exception:
+            pass
+
+    # shift_requests.json のキー移行
+    sr = load_json(store_path("shift_requests.json"), {})
+    changed = False
+    for ym, entry in sr.items():
+        if isinstance(entry, dict) and "entries" in entry:
+            if old_username in entry["entries"]:
+                entry["entries"][new_username] = entry["entries"].pop(old_username)
+                changed = True
+    if changed:
+        try:
+            save_json(store_path("shift_requests.json"), sr)
+        except Exception:
+            pass
+
+    # セッションのusernameも更新
+    if (st.session_state.get("user") or {}).get("username") == old_username:
+        st.session_state.user["username"] = new_username
+
+    return True, None
+
 def delete_user(username):
     data = load_json("users.json", {"users": []})
     target = next((u for u in data["users"] if u["username"] == username), None)

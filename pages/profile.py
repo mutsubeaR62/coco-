@@ -5,7 +5,8 @@ from datetime import datetime
 from utils import (apply_theme, require_login, page_header,
                    get_all_users, update_user, get_coco_spec, coco_spec_badge,
                    SERVICE_LEVELS, COOKING_LEVELS, ROLE_LABELS, get_employee_type,
-                   load_json, SECRET_QUESTIONS, switch_store, get_store_display_name)
+                   load_json, SECRET_QUESTIONS, switch_store, get_store_display_name,
+                   change_username)
 
 apply_theme()
 require_login()
@@ -99,6 +100,47 @@ if is_admin:
     st.caption("CoCoスペは管理者ページから変更できます。")
 else:
     st.caption("CoCoスペの変更は管理者にお申し付けください。")
+
+st.divider()
+
+# ─── ログインID変更 ────────────────────────────────────────────
+st.markdown("### 🔑 ログインID変更")
+
+with st.form("change_username_form"):
+    st.caption(f"現在のID: **{username}**")
+    col_u1, col_u2 = st.columns(2)
+    with col_u1:
+        new_un = st.text_input("新しいID", placeholder="半角英数字・アンダースコアのみ")
+    with col_u2:
+        confirm_pw = st.text_input("現在のパスワード（確認）", type="password")
+    if st.form_submit_button("IDを変更する"):
+        if not new_un:
+            st.error("新しいIDを入力してください。")
+        elif not confirm_pw:
+            st.error("パスワードを入力してください。")
+        else:
+            import hashlib as _hl
+            pw_hash = _hl.sha256(confirm_pw.encode()).hexdigest()
+            if me.get("password") != pw_hash:
+                st.error("パスワードが違います。")
+            else:
+                ok, err = change_username(username, new_un)
+                if ok:
+                    st.success(f"✅ IDを「{new_un}」に変更しました！再ログインしてください。")
+                    # セッションをクリアして再ログインへ
+                    st.session_state.user = None
+                    st.session_state["_logout"] = True
+                    # Cookie も削除
+                    try:
+                        import extra_streamlit_components as stx
+                        _cm = stx.CookieManager(key="profile_cm")
+                        _cm.delete("coco_login")
+                    except Exception:
+                        pass
+                    import time; time.sleep(1)
+                    st.rerun()
+                else:
+                    st.error(f"❌ {err}")
 
 st.divider()
 
