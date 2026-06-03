@@ -298,67 +298,28 @@ def _get_supabase():
     except Exception:
         return None
 
-# ─── セッションキャッシュ ─────────────────────────────────────
-# st.session_state を使うことで：
-#   ① ユーザーごとに独立したキャッシュ（他店舗のデータが混入しない）
-#   ② ページ遷移のたびにSupabaseを叩かない（セッション中は1回だけ）
-_JCACHE     = "_jcache"       # {filename: data}
-_JCACHE_OK  = "_jcache_loaded"  # True になったらプリフェッチ済み
-
-def _jcache() -> dict:
-    return st.session_state.setdefault(_JCACHE, {})
-
-def prefetch_all_json():
-    """ログイン後に1回だけ呼ぶ。全データを一括取得してセッションキャッシュへ。"""
-    if st.session_state.get(_JCACHE_OK):
-        return
-    sb = _get_supabase()
-    if sb:
-        try:
-            rows = sb.table("json_store").select("key,data").execute().data or []
-            cache = st.session_state.setdefault(_JCACHE, {})
-            for row in rows:
-                cache[row["key"]] = row["data"]
-        except Exception:
-            pass
-    st.session_state[_JCACHE_OK] = True
-
+@st.cache_data(ttl=30)
 def _load_json_cached(filename):
-    """セッションキャッシュ → ローカルファイル → Supabase の順に読む"""
-    cache = _jcache()
-    if filename in cache:
-        return cache[filename]
-
-    # ローカルファイル（Supabase 障害時フォールバック）
-    _ensure_data()
-    path = os.path.join(DATA_DIR, filename)
-    if os.path.exists(path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            cache[filename] = data
-            return data
-        except Exception:
-            pass
-
-    # Supabase から個別取得（プリフェッチで取れなかったキー）
+    """Supabaseまたはローカルからデータを取得（30秒キャッシュ）"""
     sb = _get_supabase()
     if sb:
         try:
             result = sb.table("json_store").select("data").eq("key", filename).execute()
             if result.data:
-                data = result.data[0]["data"]
-                cache[filename] = data
-                return data
+                return result.data[0]["data"]
+            return None
         except Exception:
             pass
-    return None
-
-def _clear_json_cache():
-    st.session_state.pop(_JCACHE, None)
-    st.session_state.pop(_JCACHE_OK, None)
-
-_load_json_cached.clear = _clear_json_cache   # 既存の .clear() 呼び出しとの互換性
+    # フォールバック: ローカルファイル
+    _ensure_data()
+    path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
 
 def load_json(filename, default=None):
     result = _load_json_cached(filename)
@@ -367,9 +328,6 @@ def load_json(filename, default=None):
     return result
 
 def save_json(filename, data):
-    # ── セッションキャッシュを即時更新（次の read が速い）────
-    _jcache()[filename] = data
-
     # ── ローカルには常に書く（Supabase障害時のバックアップ）────
     _ensure_data()
     path = os.path.join(DATA_DIR, filename)
@@ -384,11 +342,15 @@ def save_json(filename, data):
         for attempt in range(3):          # 最大3回リトライ
             try:
                 sb.table("json_store").upsert({"key": filename, "data": data}).execute()
+                _load_json_cached.clear()
                 return
             except Exception as e:
                 last_err = e
                 import time; time.sleep(0.3 * (attempt + 1))
+        # 3回失敗したら例外を上げて呼び出し元に伝える
         raise RuntimeError(f"Supabaseへの保存に失敗しました: {last_err}")
+
+    _load_json_cached.clear()
 
 # ─── 店舗スコープ ─────────────────────────────────────────────
 def get_store_code() -> str:
@@ -743,7 +705,6 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     if st.sidebar.button("🚪 ログアウト", use_container_width=True):
         st.session_state.user = None
         st.session_state["_logout"] = True   # Cookie復元をブロック
-        _clear_json_cache()                  # 次のユーザーにデータが残らないように
         try:
             import extra_streamlit_components as stx
             cm = stx.CookieManager(key="main_cm")   # ログイン時と同じキー
