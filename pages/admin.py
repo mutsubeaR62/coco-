@@ -13,7 +13,7 @@ require_admin()
 
 page_header("⚙️ 管理者設定", "メンバー管理・進捗確認")
 
-tab_members, tab_progress, tab_pw, tab_store = st.tabs(["メンバー管理", "進捗確認", "パスワード変更", "店舗設定"])
+tab_members, tab_progress, tab_pw, tab_store, tab_backup = st.tabs(["メンバー管理", "進捗確認", "パスワード変更", "店舗設定", "🗄️ バックアップ"])
 
 # ════ メンバー管理 ══════════════════════════════════════════════
 with tab_members:
@@ -113,10 +113,22 @@ with tab_members:
                     st.success(f"{u['name']}さんの情報を更新しました。")
                     st.rerun()
                 if not is_self:
-                    if st.button("🗑️ 削除", key=f"del_{u['username']}"):
-                        delete_user(u["username"])
-                        st.warning(f"{u['name']}さんを削除しました。")
-                        st.rerun()
+                    _del_key = f"confirm_del_{u['username']}"
+                    if not st.session_state.get(_del_key):
+                        if st.button("🗑️ 削除", key=f"del_{u['username']}"):
+                            st.session_state[_del_key] = True
+                            st.rerun()
+                    else:
+                        st.warning(f"⚠️ **{u['name']}さんを本当に削除しますか？**　この操作は取り消せません。")
+                        _c1, _c2 = st.columns(2)
+                        if _c1.button("はい、削除する", key=f"del_yes_{u['username']}", type="primary"):
+                            delete_user(u["username"])
+                            st.session_state.pop(_del_key, None)
+                            st.success(f"{u['name']}さんを削除しました。")
+                            st.rerun()
+                        if _c2.button("キャンセル", key=f"del_no_{u['username']}"):
+                            st.session_state.pop(_del_key, None)
+                            st.rerun()
 
             # ── 所属店舗管理 ──────────────────────────────────
             st.markdown("---")
@@ -350,17 +362,124 @@ with tab_store:
         unsafe_allow_html=True
     )
 
-    with st.form("store_code_form"):
-        _new_sc = st.text_input("新しい店舗コード",
-                                 placeholder="例: toyota01 / nagoya_honcho",
-                                 help="半角英数字・アンダースコア推奨。変更すると全メンバーと全データが新コードに移行されます。")
-        if st.form_submit_button("店舗コードを変更", type="primary"):
-            if not _new_sc.strip():
-                st.error("コードを入力してください。")
-            elif _new_sc.strip() == _cur_sc:
-                st.warning("現在と同じコードです。")
+    if not st.session_state.get("confirm_sc_change"):
+        with st.form("store_code_form"):
+            _new_sc = st.text_input("新しい店舗コード",
+                                     placeholder="例: toyota01 / nagoya_honcho",
+                                     help="半角英数字・アンダースコア推奨。変更すると全メンバーと全データが新コードに移行されます。")
+            if st.form_submit_button("店舗コードを変更"):
+                if not _new_sc.strip():
+                    st.error("コードを入力してください。")
+                elif _new_sc.strip() == _cur_sc:
+                    st.warning("現在と同じコードです。")
+                else:
+                    st.session_state["confirm_sc_change"] = _new_sc.strip()
+                    st.rerun()
+    else:
+        _pending_sc = st.session_state["confirm_sc_change"]
+        st.error(
+            f"⚠️ **本当に店舗コードを変更しますか？**\n\n"
+            f"「`{_cur_sc}`」→「`{_pending_sc}`」\n\n"
+            f"- 全メンバーのデータが新コードに移行されます\n"
+            f"- 現在ログイン中のメンバーは**再ログインが必要**になります\n"
+            f"- **この操作は慎重に行ってください**"
+        )
+        _sc1, _sc2 = st.columns(2)
+        if _sc1.button("✅ はい、変更する", type="primary", key="sc_yes"):
+            update_store_code(_cur_sc, _pending_sc)
+            st.session_state.user["store_code"] = _pending_sc
+            if "store_codes" in st.session_state.user:
+                st.session_state.user["store_codes"] = [
+                    _pending_sc if c == _cur_sc else c
+                    for c in st.session_state.user["store_codes"]
+                ]
+            st.session_state.pop("confirm_sc_change", None)
+            st.success(f"✅ 店舗コードを「{_pending_sc}」に変更しました。他のメンバーに再ログインを伝えてください。")
+            st.rerun()
+        if _sc2.button("キャンセル", key="sc_no"):
+            st.session_state.pop("confirm_sc_change", None)
+            st.rerun()
+
+# ════ バックアップ ════════════════════════════════════════════════
+with tab_backup:
+    import json
+    from datetime import datetime as _dt
+    from utils import load_json, save_json, store_path, get_store_code, _STORE_FILES
+
+    st.markdown("#### 🗄️ データのバックアップ・リストア")
+
+    # ── エクスポート ──────────────────────────────────────────────
+    st.markdown("##### 📥 バックアップをダウンロード")
+    st.caption("現在の店舗の全データをJSONファイルとして保存します。")
+
+    _backup_data = {
+        "created_at": _dt.now().isoformat(),
+        "store_code": get_store_code(),
+        "users": load_json("users.json", {"users": {}}),
+        "store_data": {}
+    }
+    for _fname in _STORE_FILES:
+        _d = load_json(store_path(_fname), None)
+        if _d is not None:
+            _backup_data["store_data"][_fname] = _d
+
+    _backup_json = json.dumps(_backup_data, ensure_ascii=False, indent=2)
+    _ts = _dt.now().strftime("%Y%m%d_%H%M")
+    st.download_button(
+        label="⬇️ バックアップをダウンロード",
+        data=_backup_json,
+        file_name=f"coco_backup_{get_store_code()}_{_ts}.json",
+        mime="application/json",
+        use_container_width=True,
+        type="primary",
+    )
+
+    st.divider()
+
+    # ── リストア ──────────────────────────────────────────────────
+    st.markdown("##### 📤 バックアップから復元")
+    st.caption("ダウンロードしたJSONファイルをアップロードして復元します。")
+    st.warning("⚠️ 復元すると現在のデータが上書きされます。必ず先にバックアップを取ってください。")
+
+    _uploaded = st.file_uploader("バックアップファイルを選択", type=["json"], key="restore_upload")
+
+    if _uploaded:
+        try:
+            _restore_data = json.loads(_uploaded.read().decode("utf-8"))
+            _restore_sc   = _restore_data.get("store_code", "不明")
+            _restore_ts   = _restore_data.get("created_at", "不明")
+            _restore_users_count = len((_restore_data.get("users") or {}).get("users", []))
+
+            st.info(
+                f"**バックアップ情報**\n\n"
+                f"- 作成日時: {_restore_ts}\n"
+                f"- 店舗コード: {_restore_sc}\n"
+                f"- ユーザー数: {_restore_users_count}名"
+            )
+
+            if not st.session_state.get("confirm_restore"):
+                if st.button("このバックアップで復元する", type="primary", key="restore_btn"):
+                    st.session_state["confirm_restore"] = True
+                    st.session_state["restore_payload"] = _restore_data
+                    st.rerun()
             else:
-                update_store_code(_cur_sc, _new_sc.strip())
-                st.session_state.user["store_code"] = _new_sc.strip()
-                st.success(f"✅ 店舗コードを「{_new_sc.strip()}」に変更しました。全メンバーとデータを移行しました。")
-                st.rerun()
+                st.error("⚠️ **本当に復元しますか？現在のデータはすべて上書きされます。**")
+                _r1, _r2 = st.columns(2)
+                if _r1.button("✅ はい、復元する", type="primary", key="restore_yes"):
+                    _payload = st.session_state.get("restore_payload", {})
+                    # ユーザーデータを復元
+                    if _payload.get("users"):
+                        save_json("users.json", _payload["users"])
+                    # 店舗データを復元
+                    for _fname, _fdata in (_payload.get("store_data") or {}).items():
+                        save_json(store_path(_fname), _fdata)
+                    st.session_state.pop("confirm_restore", None)
+                    st.session_state.pop("restore_payload", None)
+                    st.success("✅ 復元が完了しました！ページを再読み込みしてください。")
+                    st.rerun()
+                if _r2.button("キャンセル", key="restore_no"):
+                    st.session_state.pop("confirm_restore", None)
+                    st.session_state.pop("restore_payload", None)
+                    st.rerun()
+        except Exception as _e:
+            st.error(f"ファイルの読み込みに失敗しました: {_e}")
