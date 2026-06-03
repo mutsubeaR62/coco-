@@ -126,18 +126,14 @@ with st.form("change_username_form"):
             else:
                 ok, err = change_username(username, new_un)
                 if ok:
-                    st.success(f"✅ IDを「{new_un}」に変更しました！再ログインしてください。")
-                    # セッションをクリアして再ログインへ
-                    st.session_state.user = None
-                    st.session_state["_logout"] = True
-                    # Cookie も削除
+                    # Cookie のユーザー名も更新
                     try:
                         import extra_streamlit_components as stx
                         _cm = stx.CookieManager(key="profile_cm")
-                        _cm.delete("coco_login")
+                        _cm.set("coco_login", new_un)
                     except Exception:
                         pass
-                    import time; time.sleep(1)
+                    st.success(f"✅ IDを「{new_un}」に変更しました！")
                     st.rerun()
                 else:
                     st.error(f"❌ {err}")
