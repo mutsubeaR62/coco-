@@ -70,7 +70,7 @@ with col:
                     st.session_state.user = user
                     try:
                         import extra_streamlit_components as stx
-                        _cm = stx.CookieManager(key="login_cm")
+                        _cm = stx.CookieManager(key="main_cm")
                         _cm.set("coco_login", username,
                                 expires_at=datetime.now() + timedelta(days=30))
                     except Exception:
@@ -121,6 +121,13 @@ with col:
                     new_user = login_user(r_username, r_pw)
                     if new_user:
                         st.session_state.user = new_user
+                        try:
+                            import extra_streamlit_components as stx
+                            _rcm = stx.CookieManager(key="main_cm")
+                            _rcm.set("coco_login", r_username,
+                                     expires_at=datetime.now() + timedelta(days=30))
+                        except Exception:
+                            pass
                         _, new_stamps = award_stamps(r_username)
                         show_new_stamps(new_stamps)
                         st.rerun()

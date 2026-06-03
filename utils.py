@@ -331,6 +331,7 @@ def save_json(filename, data):
     # ── ローカルには常に書く（Supabase障害時のバックアップ）────
     _ensure_data()
     path = os.path.join(DATA_DIR, filename)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 

@@ -84,6 +84,13 @@ try:
             _u = get_user_by_username(_saved)
             if _u:
                 st.session_state.user = _u
+        elif not st.session_state.get("_cookie_checked"):
+            # CookieManagerは非同期なので初回レンダリングではNoneを返す
+            # フラグを立ててもう一度レンダリングすることでCookieを正しく読む
+            st.session_state["_cookie_checked"] = True
+            st.rerun()
+    if st.session_state.user is not None:
+        st.session_state["_cookie_checked"] = False
 except Exception:
     pass
 
