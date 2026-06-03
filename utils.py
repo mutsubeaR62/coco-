@@ -365,6 +365,10 @@ _STORE_FILES = [
     "progress.json", "graduation_template.json", "training_check.json",
     "checklists.json", "stepup_data.json", "stepup_progress.json",
     "teisu_table.json", "store_settings.json", "home_info.json", "manual.json",
+    # シフト
+    "shift_requests.json", "shift_schedules.json",
+    # 発注
+    "products.json", "stock_backup.json", "next_delivery.json", "order_history.json",
 ]
 
 def _migrate_to_store_scope():
@@ -723,7 +727,7 @@ def show_new_stamps(new_stamps):
 
 def get_shift_deadline(year_month):
     """締切日を返す。デフォルトは前月10日。"""
-    data = load_json("shift_requests.json", {})
+    data = load_json(store_path("shift_requests.json"), {})
     overrides = data.get("_deadlines", {})
     if year_month in overrides:
         return overrides[year_month]
@@ -735,39 +739,65 @@ def get_shift_deadline(year_month):
     return f"{prev_y:04d}-{prev_m:02d}-10"
 
 def set_shift_deadline(year_month, deadline_str):
-    data = load_json("shift_requests.json", {})
+    data = load_json(store_path("shift_requests.json"), {})
     if "_deadlines" not in data:
         data["_deadlines"] = {}
     data["_deadlines"][year_month] = deadline_str
-    save_json("shift_requests.json", data)
+    save_json(store_path("shift_requests.json"), data)
 
 def submit_shift_request(username, year_month, entries):
     """entries: {date_str: {type:'work'|'off', start:str, end:str, note:str}}"""
-    data = load_json("shift_requests.json", {})
+    data = load_json(store_path("shift_requests.json"), {})
     if year_month not in data:
         data[year_month] = {}
     data[year_month][username] = {
         "submitted_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "entries": entries,
     }
-    save_json("shift_requests.json", data)
+    save_json(store_path("shift_requests.json"), data)
 
 def get_user_shift_request(username, year_month):
-    data = load_json("shift_requests.json", {})
+    data = load_json(store_path("shift_requests.json"), {})
     return data.get(year_month, {}).get(username)
 
 def get_all_shift_requests(year_month):
-    data = load_json("shift_requests.json", {})
+    data = load_json(store_path("shift_requests.json"), {})
     return {k: v for k, v in data.get(year_month, {}).items() if not k.startswith("_")}
 
 def get_shift_schedule(date_str):
-    data = load_json("shift_schedules.json", {})
+    data = load_json(store_path("shift_schedules.json"), {})
     return data.get(date_str, {"sales_target": 0, "min_staff": 3, "shifts": {}})
 
 def save_shift_schedule(date_str, schedule_data):
-    data = load_json("shift_schedules.json", {})
+    data = load_json(store_path("shift_schedules.json"), {})
     data[date_str] = schedule_data
-    save_json("shift_schedules.json", data)
+    save_json(store_path("shift_schedules.json"), data)
+
+def save_snapshot(operation: str):
+    """危険な操作の前にスナップショットを保存する（最大10件）"""
+    import uuid as _uuid
+    snapshot = {
+        "id": str(_uuid.uuid4())[:8],
+        "timestamp": datetime.now().isoformat(),
+        "operation": operation,
+        "operator": (st.session_state.get("user") or {}).get("name", "不明"),
+        "data": {
+            "users": load_json("users.json", {"users": []}),
+            "store_data": {},
+        }
+    }
+    for _fname in _STORE_FILES:
+        _d = _load_json_cached(store_path(_fname))
+        if _d is not None:
+            snapshot["data"]["store_data"][_fname] = _d
+    log = load_json(store_path("audit_log.json"), {"snapshots": []})
+    snaps = log.get("snapshots", [])
+    snaps.insert(0, snapshot)
+    log["snapshots"] = snaps[:10]   # 最新10件を保持
+    try:
+        save_json(store_path("audit_log.json"), log)
+    except Exception:
+        pass
 
 def get_employee_type(user):
     """employee_type フィールドがない場合は role から推定する。"""

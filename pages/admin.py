@@ -6,14 +6,15 @@ from utils import (apply_theme, require_admin, page_header,
                    get_progress, STAMPS, ROLE_LABELS, get_employee_type,
                    get_coco_spec, coco_spec_badge, SERVICE_LEVELS, COOKING_LEVELS,
                    get_store_settings, save_store_settings,
-                   get_store_code, update_store_code, get_store_display_name)
+                   get_store_code, update_store_code, get_store_display_name,
+                   save_snapshot, load_json, save_json, store_path, _STORE_FILES)
 
 apply_theme()
 require_admin()
 
 page_header("⚙️ 管理者設定", "メンバー管理・進捗確認")
 
-tab_members, tab_progress, tab_pw, tab_store, tab_backup = st.tabs(["メンバー管理", "進捗確認", "パスワード変更", "店舗設定", "🗄️ バックアップ"])
+tab_members, tab_progress, tab_store, tab_data = st.tabs(["👥 メンバー管理", "📊 進捗確認", "🏪 店舗設定", "🗄️ データ管理"])
 
 # ════ メンバー管理 ══════════════════════════════════════════════
 with tab_members:
@@ -122,6 +123,7 @@ with tab_members:
                         st.warning(f"⚠️ **{u['name']}さんを本当に削除しますか？**　この操作は取り消せません。")
                         _c1, _c2 = st.columns(2)
                         if _c1.button("はい、削除する", key=f"del_yes_{u['username']}", type="primary"):
+                            save_snapshot(f"ユーザー削除: {u['name']}")
                             delete_user(u["username"])
                             st.session_state.pop(_del_key, None)
                             st.success(f"{u['name']}さんを削除しました。")
@@ -212,6 +214,43 @@ with tab_members:
             else:
                 st.error("すべての項目を入力してください。")
 
+    st.divider()
+    with st.expander("🔐 パスワード変更"):
+        _pw_tab1, _pw_tab2 = st.tabs(["メンバーのパスワードをリセット", "自分のパスワードを変更"])
+        with _pw_tab1:
+            _pw_users = get_all_users()
+            _pw_opts = {u["name"]: u["username"] for u in _pw_users}
+            with st.form("reset_pw"):
+                _pw_target = st.selectbox("対象メンバー", list(_pw_opts.keys()))
+                _new_pw = st.text_input("新しいパスワード", type="password")
+                _confirm_pw = st.text_input("確認（同じパスワードをもう一度）", type="password")
+                if st.form_submit_button("パスワードを変更", type="primary"):
+                    if not _new_pw:
+                        st.error("パスワードを入力してください。")
+                    elif _new_pw != _confirm_pw:
+                        st.error("パスワードが一致しません。")
+                    elif len(_new_pw) < 6:
+                        st.error("パスワードは6文字以上にしてください。")
+                    else:
+                        update_user(_pw_opts[_pw_target], password=_new_pw)
+                        st.success(f"✅ {_pw_target}さんのパスワードを変更しました。")
+        with _pw_tab2:
+            with st.form("self_pw"):
+                _cur_pw = st.text_input("現在のパスワード", type="password")
+                _s_new = st.text_input("新しいパスワード", type="password")
+                _s_conf = st.text_input("確認", type="password")
+                if st.form_submit_button("変更する", type="primary"):
+                    from utils import login_user
+                    if not login_user(st.session_state.user["username"], _cur_pw):
+                        st.error("現在のパスワードが違います。")
+                    elif _s_new != _s_conf:
+                        st.error("新しいパスワードが一致しません。")
+                    elif len(_s_new) < 6:
+                        st.error("6文字以上で設定してください。")
+                    else:
+                        update_user(st.session_state.user["username"], password=_s_new)
+                        st.success("✅ パスワードを変更しました。次回ログインから適用されます。")
+
 # ════ 進捗確認 ══════════════════════════════════════════════════
 with tab_progress:
     users = get_all_users()
@@ -268,45 +307,7 @@ with tab_progress:
                 df = pd.DataFrame({"得点": scores})
                 st.line_chart(df, height=120, use_container_width=True)
 
-# ════ パスワード変更 ═════════════════════════════════════════════
-with tab_pw:
-    st.markdown("#### メンバーのパスワードをリセット")
-    users = get_all_users()
-    user_options = {u["name"]: u["username"] for u in users}
-
-    with st.form("reset_pw"):
-        target_name = st.selectbox("対象メンバー", list(user_options.keys()))
-        new_pw = st.text_input("新しいパスワード", type="password")
-        confirm_pw = st.text_input("確認（同じパスワードをもう一度）", type="password")
-        if st.form_submit_button("パスワードを変更", type="primary"):
-            if not new_pw:
-                st.error("パスワードを入力してください。")
-            elif new_pw != confirm_pw:
-                st.error("パスワードが一致しません。")
-            elif len(new_pw) < 6:
-                st.error("パスワードは6文字以上にしてください。")
-            else:
-                target_username = user_options[target_name]
-                update_user(target_username, password=new_pw)
-                st.success(f"✅ {target_name}さんのパスワードを変更しました。")
-
-    st.divider()
-    st.markdown("#### 自分のパスワードを変更")
-    with st.form("self_pw"):
-        current_pw = st.text_input("現在のパスワード", type="password")
-        s_new_pw = st.text_input("新しいパスワード", type="password")
-        s_confirm_pw = st.text_input("確認", type="password")
-        if st.form_submit_button("変更する", type="primary"):
-            from utils import login_user
-            if not login_user(st.session_state.user["username"], current_pw):
-                st.error("現在のパスワードが違います。")
-            elif s_new_pw != s_confirm_pw:
-                st.error("新しいパスワードが一致しません。")
-            elif len(s_new_pw) < 6:
-                st.error("6文字以上で設定してください。")
-            else:
-                update_user(st.session_state.user["username"], password=s_new_pw)
-                st.success("✅ パスワードを変更しました。次回ログインから適用されます。")
+# ════ 店舗設定 ═══════════════════════════════════════════════════
 
 # ════ 店舗設定 ═══════════════════════════════════════════════════
 with tab_store:
@@ -386,6 +387,7 @@ with tab_store:
         )
         _sc1, _sc2 = st.columns(2)
         if _sc1.button("✅ はい、変更する", type="primary", key="sc_yes"):
+            save_snapshot(f"店舗コード変更: {_cur_sc} → {_pending_sc}")
             update_store_code(_cur_sc, _pending_sc)
             st.session_state.user["store_code"] = _pending_sc
             if "store_codes" in st.session_state.user:
@@ -400,11 +402,10 @@ with tab_store:
             st.session_state.pop("confirm_sc_change", None)
             st.rerun()
 
-# ════ バックアップ ════════════════════════════════════════════════
-with tab_backup:
+# ════ データ管理 ════════════════════════════════════════════════
+with tab_data:
     import json
     from datetime import datetime as _dt
-    from utils import load_json, save_json, store_path, get_store_code, _STORE_FILES
 
     st.markdown("#### 🗄️ データのバックアップ・リストア")
 
@@ -466,6 +467,7 @@ with tab_backup:
                 st.error("⚠️ **本当に復元しますか？現在のデータはすべて上書きされます。**")
                 _r1, _r2 = st.columns(2)
                 if _r1.button("✅ はい、復元する", type="primary", key="restore_yes"):
+                    save_snapshot("バックアップから復元（復元前の状態）")
                     _payload = st.session_state.get("restore_payload", {})
                     # ユーザーデータを復元
                     if _payload.get("users"):
@@ -483,3 +485,42 @@ with tab_backup:
                     st.rerun()
         except Exception as _e:
             st.error(f"ファイルの読み込みに失敗しました: {_e}")
+
+    st.divider()
+
+    # ── 変更履歴 ──────────────────────────────────────────────────
+    st.markdown("##### 🕐 変更履歴（直近10件）")
+    st.caption("ユーザー削除・店舗コード変更・復元の直前に自動保存されます。")
+
+    _log = load_json(store_path("audit_log.json"), {"snapshots": []})
+    _snaps = _log.get("snapshots", [])
+
+    if not _snaps:
+        st.info("まだ変更履歴がありません。")
+    else:
+        for _i, _snap in enumerate(_snaps):
+            _ts  = _snap.get("timestamp", "")[:16].replace("T", " ")
+            _op  = _snap.get("operation", "不明")
+            _who = _snap.get("operator", "不明")
+            with st.expander(f"🕐 {_ts}　**{_op}**　by {_who}"):
+                st.caption(f"スナップショットID: {_snap.get('id', '—')}")
+                if not st.session_state.get(f"confirm_snap_{_i}"):
+                    if st.button("この時点に戻す", key=f"snap_restore_{_i}"):
+                        st.session_state[f"confirm_snap_{_i}"] = True
+                        st.rerun()
+                else:
+                    st.error(f"⚠️ **「{_op}」の直前の状態に戻しますか？現在のデータは上書きされます。**")
+                    _sr1, _sr2 = st.columns(2)
+                    if _sr1.button("✅ はい、戻す", key=f"snap_yes_{_i}", type="primary"):
+                        save_snapshot(f"履歴から復元（復元前）")
+                        _sd = _snap.get("data", {})
+                        if _sd.get("users"):
+                            save_json("users.json", _sd["users"])
+                        for _fn, _fd in (_sd.get("store_data") or {}).items():
+                            save_json(store_path(_fn), _fd)
+                        st.session_state.pop(f"confirm_snap_{_i}", None)
+                        st.success("✅ 復元しました。ページを再読み込みしてください。")
+                        st.rerun()
+                    if _sr2.button("キャンセル", key=f"snap_no_{_i}"):
+                        st.session_state.pop(f"confirm_snap_{_i}", None)
+                        st.rerun()

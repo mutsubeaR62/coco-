@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 from datetime import datetime
-from utils import apply_theme, require_login, page_header, load_json, save_json, get_progress, save_progress, award_stamps, show_new_stamps
+from utils import apply_theme, require_login, page_header, load_json, save_json, get_progress, save_progress, award_stamps, show_new_stamps, store_path
 
 apply_theme()
 require_login()
@@ -16,15 +16,15 @@ role     = user.get("role", "new")
 
 # ─── 商品データ読み込み ──────────────────────────────────────
 def get_products():
-    data = load_json("products.json", {"products": []})
+    data = load_json(store_path("products.json"), {"products": []})
     return [p for p in data.get("products", []) if p.get("active", True)]
 
 def save_products_data(products):
-    save_json("products.json", {"products": products})
+    save_json(store_path("products.json"), {"products": products})
 
 # ─── バックアップ ─────────────────────────────────────────────
 def backup_stock(stock_state, label="手動"):
-    history = load_json("stock_backup.json", {"backups": []})
+    history = load_json(store_path("stock_backup.json"), {"backups": []})
     history["backups"].insert(0, {
         "id":    datetime.now().strftime("%Y%m%d_%H%M%S"),
         "label": label,
@@ -32,10 +32,10 @@ def backup_stock(stock_state, label="手動"):
         "stock": dict(stock_state),
     })
     history["backups"] = history["backups"][:30]  # 直近30件
-    save_json("stock_backup.json", history)
+    save_json(store_path("stock_backup.json"), history)
 
 def get_backups():
-    return load_json("stock_backup.json", {"backups": []}).get("backups", [])
+    return load_json(store_path("stock_backup.json"), {"backups": []}).get("backups", [])
 
 # ─── 発注数計算 ───────────────────────────────────────────────
 def calc_order(std, stock, next_delivery=0):
@@ -134,7 +134,7 @@ with tab_order:
     # 金曜発注時：木曜翌納数を読み込む
     next_delivery_data = {}
     if day_key == "friday":
-        nd = load_json("next_delivery.json", {"items": {}}).get("items", {})
+        nd = load_json(store_path("next_delivery.json"), {"items": {}}).get("items", {})
         next_delivery_data = {name: v.get("normal", 0) for name, v in nd.items()}
         st.info("📬 **金曜発注モード** — 発注数 ＝ 金曜定数 − (現在庫 ＋ 木曜翌納数)　※「翌日納品」タブで木曜翌納数を先に入力してください。")
 
@@ -318,17 +318,17 @@ with tab_order:
                 "day_type": day_type,
                 "items":    order_items,
             }
-            history = load_json("order_history.json", {"orders": []})
+            history = load_json(store_path("order_history.json"), {"orders": []})
             history["orders"].insert(0, record)
             history["orders"] = history["orders"][:100]
-            save_json("order_history.json", history)
+            save_json(store_path("order_history.json"), history)
             backup_stock(st.session_state.stock_state, label=f"発注確定({day_type})")
 
             # ── 翌日納品数を自動保存 ──────────────────────────────
             # 通常発注 → 翌納の「通常」列に自動反映（木曜発注 → 金曜に届く分）
             # イベント発注 → 翌納の「イベント」列に自動反映
             if day_key in ("default", "event"):
-                nd_data = load_json("next_delivery.json", {"items": {}})
+                nd_data = load_json(store_path("next_delivery.json"), {"items": {}})
                 nd_items = nd_data.get("items", {})
                 nd_col   = "normal" if day_key == "default" else "event"
                 for item in order_items:
@@ -339,7 +339,7 @@ with tab_order:
                     # 翌日納品タブのウィジェット値も即時更新
                     st.session_state[f"nd_n_{name}"] = item["order"] if nd_col == "normal" else nd_items[name].get("normal", 0)
                     st.session_state[f"nd_e_{name}"] = item["order"] if nd_col == "event"  else nd_items[name].get("event", 0)
-                save_json("next_delivery.json", {
+                save_json(store_path("next_delivery.json"), {
                     "items":      nd_items,
                     "updated":    datetime.now().strftime("%Y-%m-%d %H:%M"),
                     "updated_by": user["name"],
@@ -363,7 +363,7 @@ with tab_next:
     st.markdown("#### 📬 翌日納品数入力")
     st.caption("翌日入荷予定の数量を記録しておこう（通常・イベント別）")
 
-    next_data = load_json("next_delivery.json", {"items": {}})
+    next_data = load_json(store_path("next_delivery.json"), {"items": {}})
     items_nd  = next_data.get("items", {})
 
     # ヘッダー
@@ -400,12 +400,12 @@ with tab_next:
         items_nd[name]["event"]  = v_event
 
     if st.button("💾 翌日納品数を保存", type="primary"):
-        save_json("next_delivery.json", {"items": items_nd, "updated": datetime.now().strftime("%Y-%m-%d %H:%M"), "updated_by": user["name"]})
+        save_json(store_path("next_delivery.json"), {"items": items_nd, "updated": datetime.now().strftime("%Y-%m-%d %H:%M"), "updated_by": user["name"]})
         st.success("保存しました！")
 
 # ════ TAB3: 発注履歴 ══════════════════════════════════════════
 with tab_history:
-    history = load_json("order_history.json", {"orders": []}).get("orders", [])
+    history = load_json(store_path("order_history.json"), {"orders": []}).get("orders", [])
     if not history:
         st.info("発注履歴はまだありません。")
     else:
@@ -426,7 +426,7 @@ with tab_manage:
     st.markdown("#### 商品一覧・編集")
     st.caption("商品の定数・場所・メモを変更できます")
 
-    all_products = load_json("products.json", {"products": []}).get("products", [])
+    all_products = load_json(store_path("products.json"), {"products": []}).get("products", [])
 
     # 絞り込み
     loc_filter = st.selectbox("場所で絞り込み", ["すべて"] + sorted(set(p["location"] for p in all_products if p.get("location"))))
