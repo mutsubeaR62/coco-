@@ -101,6 +101,18 @@ with st.form("edit_profile"):
                                        disabled=not is_admin)
 
     st.divider()
+    st.markdown("**目標・学びたいこと**")
+    new_goal = st.text_area(
+        "目標",
+        value=me.get("goal", "") or "",
+        placeholder="例: 調理を覚えて一人前になりたい / 笑顔の接客を身につける",
+        help="ホーム画面でチームメンバー全員に表示されます（任意）",
+        max_chars=200,
+        label_visibility="collapsed",
+    )
+    st.caption("ホーム画面のチーム欄に表示されます（任意・最大200文字）")
+
+    st.divider()
     st.markdown("**秘密の質問（パスワードリセット用）**")
     cur_q = me.get("secret_question", "") or ""
     sq_opts = SECRET_QUESTIONS
@@ -111,7 +123,7 @@ with st.form("edit_profile"):
 
     if st.form_submit_button("保存", type="primary"):
         kwargs = {"name": new_name, "birthday": new_birthday,
-                  "secret_question": new_sq}
+                  "secret_question": new_sq, "goal": new_goal}
         if new_sa:
             kwargs["secret_answer"] = new_sa
         if is_admin:

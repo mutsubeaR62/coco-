@@ -1,6 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
+import pandas as pd
 from datetime import datetime
 from utils import (apply_theme, require_login, page_header, load_json, save_json,
                    get_progress, save_progress, award_stamps, show_new_stamps,
@@ -242,30 +243,26 @@ with tab_daily:
             all_cls = data.get("checklists", [])
             for ci, cl in enumerate(all_cls):
                 st.markdown(f"##### {cl['icon']} {cl['name']}")
-                for ii, item in enumerate(cl["items"]):
-                    col1, col2, col3 = st.columns([5, 5, 1])
-                    with col1:
-                        new_task = st.text_input("タスク", value=item["task"],
-                                                  key=f"etask_{ci}_{ii}",
-                                                  label_visibility="collapsed")
-                    with col2:
-                        new_why = st.text_input("なぜやるか", value=item.get("why", ""),
-                                                 key=f"ewhy_{ci}_{ii}",
-                                                 label_visibility="collapsed")
-                    with col3:
-                        if st.button("🗑️", key=f"edel_{ci}_{ii}"):
-                            all_cls[ci]["items"].pop(ii)
-                            save_json("checklists.json", {"checklists": all_cls})
-                            st.rerun()
-                    if new_task != item["task"] or new_why != item.get("why", ""):
-                        all_cls[ci]["items"][ii] = {"task": new_task, "why": new_why}
+                items_df = pd.DataFrame([
+                    {"タスク": it["task"], "なぜやるか": it.get("why", "")}
+                    for it in cl["items"]
+                ] if cl["items"] else [{"タスク": "", "なぜやるか": ""}])
+                edited = st.data_editor(
+                    items_df, num_rows="dynamic",
+                    use_container_width=True, hide_index=True,
+                    key=f"cl_editor_{ci}",
+                    column_config={
+                        "タスク":     st.column_config.TextColumn("タスク",     width="medium"),
+                        "なぜやるか": st.column_config.TextColumn("なぜやるか", width="large"),
+                    },
+                )
+                all_cls[ci]["items"] = [
+                    {"task": str(r["タスク"]).strip(), "why": str(r["なぜやるか"]).strip()}
+                    for _, r in edited.iterrows()
+                    if r["タスク"] and str(r["タスク"]).strip()
+                ]
 
-                if st.button(f"「{cl['name']}」に項目追加", key=f"eadd_{ci}"):
-                    all_cls[ci]["items"].append({"task": "新しい項目", "why": "なぜやるかを入力"})
-                    save_json("checklists.json", {"checklists": all_cls})
-                    st.rerun()
-
-            if st.button("変更を保存", type="primary"):
+            if st.button("変更を保存", type="primary", key="cl_save"):
                 save_json("checklists.json", {"checklists": all_cls})
                 st.success("保存しました！")
                 st.rerun()
@@ -340,28 +337,22 @@ with tab_stepup:
                     st.markdown(f"**{sec['name']}**")
                     new_sec_name = st.text_input("セクション名", value=sec["name"],
                                                   key=f"secname_{s_idx}_{sec_idx}")
-                    new_items = []
-                    for i_idx, item in enumerate(sec["items"]):
-                        c1, c2 = st.columns([10, 1])
-                        with c1:
-                            new_item = st.text_input(
-                                "", value=item,
-                                key=f"item_{s_idx}_{sec_idx}_{i_idx}",
-                                label_visibility="collapsed"
-                            )
-                        with c2:
-                            if st.button("🗑️", key=f"del_{s_idx}_{sec_idx}_{i_idx}"):
-                                stages2[s_idx]["sections"][sec_idx]["items"].pop(i_idx)
-                                save_stepup_data({"stages": stages2})
-                                st.rerun()
-                        new_items.append(new_item)
-                    add_item = st.text_input("項目を追加",
-                                              placeholder="新しい項目を入力",
-                                              key=f"add_{s_idx}_{sec_idx}")
-                    if add_item:
-                        new_items.append(add_item)
-                    stages2[s_idx]["sections"][sec_idx]["name"] = new_sec_name
-                    stages2[s_idx]["sections"][sec_idx]["items"] = new_items
+                    items_df2 = pd.DataFrame(
+                        {"項目": sec["items"]} if sec["items"] else {"項目": []}
+                    )
+                    edited_items = st.data_editor(
+                        items_df2, num_rows="dynamic",
+                        use_container_width=True, hide_index=True,
+                        key=f"items_{s_idx}_{sec_idx}",
+                        column_config={
+                            "項目": st.column_config.TextColumn("項目", width="large"),
+                        },
+                    )
+                    stages2[s_idx]["sections"][sec_idx]["name"]  = new_sec_name
+                    stages2[s_idx]["sections"][sec_idx]["items"] = [
+                        str(r).strip() for r in edited_items["項目"].tolist()
+                        if r is not None and str(r).strip()
+                    ]
                 stages2[s_idx]["title"]  = new_title
                 stages2[s_idx]["target"] = new_target
 

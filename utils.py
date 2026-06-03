@@ -461,7 +461,7 @@ def update_user(username, **kwargs):
     for u in data["users"]:
         if u["username"] == username:
             for field in ("role", "name", "employee_type", "hourly_wage",
-                          "birthday", "coco_spec", "secret_question"):
+                          "birthday", "coco_spec", "secret_question", "goal"):
                 if field in kwargs:
                     u[field] = kwargs[field]
             if "password" in kwargs:

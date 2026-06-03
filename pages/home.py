@@ -4,7 +4,7 @@ import streamlit as st
 from datetime import datetime
 from utils import (apply_theme, require_login, page_header, get_progress,
                    STAMPS, ROLE_LABELS, get_today_birthdays, coco_spec_badge,
-                   get_coco_spec, is_manager, get_all_users)
+                   get_coco_spec, is_manager, get_all_users, load_json, save_json)
 
 apply_theme()
 require_login()
@@ -160,14 +160,51 @@ elif role == "mate":
 else:
     st.info("お疲れ様です！今日もよろしくお願いします。")
 
+# ─── チームの目標 ─────────────────────────────────────────────
+st.subheader("チームの目標")
+_users_with_goals = [u for u in _all_users if (u.get("goal") or "").strip()]
+if _users_with_goals:
+    _gcols = st.columns(min(3, len(_users_with_goals)))
+    for _gi, _gu in enumerate(_users_with_goals):
+        with _gcols[_gi % 3]:
+            _rl = ROLE_LABELS.get(_gu.get("role", ""), "")
+            st.markdown(
+                f"<div style='background:white;border-radius:12px;padding:14px 16px;"
+                f"box-shadow:0 2px 10px rgba(0,0,0,0.07);border-top:3px solid #e85d04;"
+                f"margin-bottom:10px;'>"
+                f"<div style='font-weight:700;font-size:0.95rem;'>{_gu['name']}</div>"
+                f"<div style='font-size:0.72rem;color:#888;margin-bottom:8px;'>{_rl}</div>"
+                f"<div style='font-size:0.88rem;color:#333;line-height:1.6;'>🎯 {_gu['goal']}</div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+else:
+    st.caption("まだ目標を設定しているメンバーはいません。マイプロフィールから設定できます！")
+
+st.divider()
+
 # ─── アプリの説明 ─────────────────────────────────────────────
-with st.expander("このアプリの使い方"):
-    st.markdown("""
+_DEFAULT_DESC = """\
 | ページ | 内容 |
 |--------|------|
-| 📋 マニュアル | 業務手順・接客・衛生管理などを確認できます |
-| 📦 発注管理 | 食材の発注数を計算・記録できます |
-| 🎓 新人研修 | フラッシュカード・クイズ・スタンプで楽しく学べます |
-| ✅ チェックリスト | 開店・閉店・衛生などの確認チェックリストです |
-| ⚙️ 管理者設定 | （管理者のみ）メンバー管理・進捗確認ができます |
-""")
+| 📋 マニュアル | 業務手順・接客・調理・ソース量表・定数表を確認できます |
+| 📦 発注管理 | 食材の発注数を計算・記録できます（メイト以上） |
+| 🎓 新人研修 | フラッシュカード・クイズ・スタンプ・卒業チェックリスト |
+| ✅ チェックリスト | 開店・接客・閉店・衛生などの日常チェックとステップアップ表 |
+| 👤 マイプロフィール | 自分の情報確認・CoCoスペ・目標の設定 |
+| ⚙️ 管理者設定 | メンバー管理・進捗確認・パスワード変更（管理者のみ） |
+"""
+_home_info = load_json("home_info.json", {"description": _DEFAULT_DESC})
+_desc_text = _home_info.get("description") or _DEFAULT_DESC
+
+with st.expander("このアプリの使い方"):
+    st.markdown(_desc_text)
+    if is_manager(user):
+        st.divider()
+        st.caption("管理者: 説明文を編集できます（Markdown形式）")
+        _new_desc = st.text_area("説明文", value=_desc_text, height=180,
+                                  label_visibility="collapsed", key="home_desc_edit")
+        if st.button("説明を保存", key="save_home_desc"):
+            save_json("home_info.json", {"description": _new_desc})
+            st.success("保存しました！")
+            st.rerun()

@@ -109,13 +109,20 @@ with col:
             elif r_pw != r_pw2:
                 st.error("パスワードが一致しません。")
             else:
-                ok = add_user(r_username, r_pw, r_name, "kenshu",
-                              secret_question=r_question, secret_answer=r_answer)
+                ok, err_msg = add_user(r_username, r_pw, r_name, "kenshu",
+                                       secret_question=r_question, secret_answer=r_answer)
                 if ok:
-                    st.success(f"✅ アカウントを作成しました！ユーザー名: **{r_username}**")
-                    st.info("「ログイン」タブからログインしてください。")
+                    # 登録完了と同時に自動ログイン
+                    new_user = login_user(r_username, r_pw)
+                    if new_user:
+                        st.session_state.user = new_user
+                        _, new_stamps = award_stamps(r_username)
+                        show_new_stamps(new_stamps)
+                        st.rerun()
+                    else:
+                        st.success(f"✅ アカウントを作成しました！ログインタブからログインしてください。")
                 else:
-                    st.error("そのユーザー名は既に使われています。別のユーザー名を試してください。")
+                    st.error(f"❌ {err_msg or 'そのユーザー名は既に使われています。'}")
 
     # ════ パスワードリセット ══════════════════════════════════════
     with tab_reset:
