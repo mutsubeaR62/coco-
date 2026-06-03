@@ -62,48 +62,51 @@ with tab_members:
 
             st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)
 
-            # ── 2行目: ステータス / 雇用 / 時給 / 接客 / 調理 ──────────────
-            _roles   = ["kenshu", "mate", "daiko", "admin"]
+            # ── 2行目: [ステータス | 雇用 | 時給]  [CoCoスペ: 接客 | 調理] ──
+            _roles    = ["kenshu", "mate", "daiko", "admin"]
             _cur_role = u.get("role", "kenshu") if u.get("role") in _roles else "mate"
             _emp_opts = ["baito", "seishain"]
-
-            _ec1, _ec2, _ec3, _ec4, _ec5 = st.columns([2, 2, 2, 2, 2])
-            new_role = _ec1.selectbox("ステータス", _roles,
-                index=_roles.index(_cur_role),
-                format_func=lambda x: ROLE_LABELS.get(x, x),
-                key=f"role_{u['username']}")
-            new_emp = _ec2.selectbox("雇用形態", _emp_opts,
-                index=_emp_opts.index(get_employee_type(u)),
-                format_func=lambda x: "バイト" if x == "baito" else "社員",
-                key=f"emp_{u['username']}")
-            new_wage = _ec3.number_input("時給 (¥)", value=int(u.get("hourly_wage", 1050)),
-                step=10, min_value=500, key=f"wage_{u['username']}")
             _svc_opts  = [x if x else "未取得" for x in SERVICE_LEVELS]
             _ckng_opts = [x if x else "未取得" for x in COOKING_LEVELS]
             _cur_svc  = spec.get("service") or "未取得"
             _cur_ckng = spec.get("cooking") or "未取得"
-            new_svc  = _ec4.selectbox("接客", _svc_opts,
-                index=_svc_opts.index(_cur_svc) if _cur_svc in _svc_opts else 0,
-                key=f"svc_{u['username']}")
-            new_ckng = _ec5.selectbox("調理", _ckng_opts,
-                index=_ckng_opts.index(_cur_ckng) if _cur_ckng in _ckng_opts else 0,
-                key=f"ckng_{u['username']}")
 
-            # ── 3行目: 誕生日 / ボタン ───────────────────────────────────
-            _bc1, _bc2, _bc3 = st.columns([3, 1, 1])
-            new_bday = _bc1.text_input("誕生日", value=u.get("birthday", "") or "",
-                placeholder="例: 07-15 または 2002-07-15", key=f"bday_{u['username']}")
+            _left_col, _right_col = st.columns([3, 2])
+            with _left_col:
+                _lc1, _lc2, _lc3 = st.columns(3)
+                new_role = _lc1.selectbox("ステータス", _roles,
+                    index=_roles.index(_cur_role),
+                    format_func=lambda x: ROLE_LABELS.get(x, x),
+                    key=f"role_{u['username']}")
+                new_emp = _lc2.selectbox("雇用形態", _emp_opts,
+                    index=_emp_opts.index(get_employee_type(u)),
+                    format_func=lambda x: "バイト" if x == "baito" else "社員",
+                    key=f"emp_{u['username']}")
+                new_wage = _lc3.number_input("時給 (¥)", value=int(u.get("hourly_wage", 1050)),
+                    step=10, min_value=500, key=f"wage_{u['username']}")
+            with _right_col:
+                with st.container(border=True):
+                    st.caption("CoCoスペ")
+                    _cc1, _cc2 = st.columns(2)
+                    new_svc  = _cc1.selectbox("接客", _svc_opts,
+                        index=_svc_opts.index(_cur_svc) if _cur_svc in _svc_opts else 0,
+                        key=f"svc_{u['username']}")
+                    new_ckng = _cc2.selectbox("調理", _ckng_opts,
+                        index=_ckng_opts.index(_cur_ckng) if _cur_ckng in _ckng_opts else 0,
+                        key=f"ckng_{u['username']}")
+
+            # ── 3行目: ボタン ────────────────────────────────────────────
+            _bc2, _bc3 = st.columns([1, 1])
             with _bc2:
-                st.markdown("<div style='margin-top:26px'></div>", unsafe_allow_html=True)
                 if st.button("更新", key=f"update_{u['username']}", type="primary", use_container_width=True):
                     update_user(u["username"], role=new_role, employee_type=new_emp,
-                                hourly_wage=new_wage, birthday=new_bday,
+                                hourly_wage=new_wage,
                                 coco_spec={"service": None if new_svc == "未取得" else new_svc,
                                            "cooking": None if new_ckng == "未取得" else new_ckng})
                     st.success(f"✅ {u['name']}さんを更新しました。")
                     st.rerun()
             with _bc3:
-                st.markdown("<div style='margin-top:26px'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='margin-top:0px'></div>", unsafe_allow_html=True)
                 if not is_self:
                     _del_key = f"confirm_del_{u['username']}"
                     if not st.session_state.get(_del_key):
