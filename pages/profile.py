@@ -5,7 +5,7 @@ from datetime import datetime
 from utils import (apply_theme, require_login, page_header,
                    get_all_users, update_user, get_coco_spec, coco_spec_badge,
                    SERVICE_LEVELS, COOKING_LEVELS, ROLE_LABELS, get_employee_type,
-                   load_json, SECRET_QUESTIONS)
+                   load_json, SECRET_QUESTIONS, switch_store, get_store_display_name)
 
 apply_theme()
 require_login()
@@ -14,6 +14,42 @@ page_header("👤 マイプロフィール", "自分の情報を確認・更新�
 
 user = st.session_state.user
 username = user["username"]
+
+# ─── 勤務店舗の切り替え（複数所属の人のみ） ──────────────────────
+_my_codes = user.get("store_codes") or [user.get("store_code") or "default"]
+if len(_my_codes) > 1:
+    _cur_code = user.get("store_code") or "default"
+    st.markdown("### 🏪 勤務店舗の切り替え")
+    _cols = st.columns(len(_my_codes))
+    for _i, _sc in enumerate(_my_codes):
+        _name = get_store_display_name(_sc)
+        _is_cur = _sc == _cur_code
+        with _cols[_i]:
+            if _is_cur:
+                st.markdown(
+                    f"<div style='background:#fff3e0;border:2px solid #e85d04;border-radius:12px;"
+                    f"padding:14px;text-align:center;'>"
+                    f"<div style='font-size:1.2rem;'>✅</div>"
+                    f"<div style='font-weight:700;color:#e85d04;font-size:.9rem;margin-top:4px;'>{_name}</div>"
+                    f"<div style='font-size:.72rem;color:#aaa;'>{_sc}</div>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown(
+                    f"<div style='background:#f9f9f9;border:1px solid #ddd;border-radius:12px;"
+                    f"padding:14px;text-align:center;'>"
+                    f"<div style='font-size:1.2rem;'>🏪</div>"
+                    f"<div style='font-weight:600;color:#555;font-size:.9rem;margin-top:4px;'>{_name}</div>"
+                    f"<div style='font-size:.72rem;color:#aaa;'>{_sc}</div>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+                st.markdown("<div style='margin-top:4px'></div>", unsafe_allow_html=True)
+                if st.button(f"ここに切り替え", key=f"sw_{_sc}", use_container_width=True):
+                    switch_store(_sc)
+                    st.rerun()
+    st.divider()
 is_admin = user.get("role") == "admin"
 
 # 最新のユーザー情報を取得
