@@ -141,49 +141,22 @@ st.divider()
 # ─── 他メンバーのCoCoスペ一覧（管理者のみ） ─────────────────────
 if is_admin:
     st.markdown("### 全メンバーのCoCoスペ一覧")
-    st.caption("接客・調理のセルを直接クリックして編集できます。編集後は「変更を保存」を押してください。")
+    st.caption("CoCoスペの変更は「管理者設定」から行えます。")
 
     import pandas as pd
-
-    _svc_opts  = ["未取得"] + [x for x in SERVICE_LEVELS if x]
-    _ckng_opts = ["未取得"] + [x for x in COOKING_LEVELS if x]
-    _emp_opts  = ["バイト", "社員"]
 
     _rows = []
     for u in all_users:
         sp = get_coco_spec(u)
         _rows.append({
-            "_username": u["username"],
             "名前":     u.get("name", ""),
-            "接客":     sp.get("service") or "未取得",
-            "調理":     sp.get("cooking") or "未取得",
+            "接客":     sp.get("service") or "—",
+            "調理":     sp.get("cooking") or "—",
             "雇用形態": "バイト" if get_employee_type(u) == "baito" else "社員",
         })
 
-    _df = pd.DataFrame(_rows)
-    _display_df = _df.drop(columns=["_username"])
-
-    _edited = st.data_editor(
-        _display_df,
-        column_config={
-            "名前":     st.column_config.TextColumn("名前", disabled=True),
-            "接客":     st.column_config.SelectboxColumn("接客", options=_svc_opts),
-            "調理":     st.column_config.SelectboxColumn("調理", options=_ckng_opts),
-            "雇用形態": st.column_config.SelectboxColumn("雇用形態", options=_emp_opts),
-        },
+    st.dataframe(
+        pd.DataFrame(_rows),
         hide_index=True,
         use_container_width=True,
-        key="coco_spec_editor",
     )
-
-    if st.button("変更を保存", type="primary", key="save_spec_table"):
-        for i, row in _edited.iterrows():
-            _uname = _df.iloc[i]["_username"]
-            _svc  = None if row["接客"] == "未取得" else row["接客"]
-            _ckng = None if row["調理"] == "未取得" else row["調理"]
-            _emp  = "baito" if row["雇用形態"] == "バイト" else "seishain"
-            update_user(_uname,
-                        coco_spec={"service": _svc, "cooking": _ckng},
-                        employee_type=_emp)
-        st.success("✅ 変更を保存しました！")
-        st.rerun()
