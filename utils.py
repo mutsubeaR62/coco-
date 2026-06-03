@@ -507,6 +507,7 @@ def add_user(username, password, name, role, store_code=None,
         "joined": datetime.now().strftime("%Y-%m-%d"),
     })
     try:
+        save_snapshot(f"ユーザー追加前バックアップ（追加: {name}）")
         save_json("users.json", data)
     except RuntimeError as e:
         return False, str(e)
@@ -538,6 +539,9 @@ def reset_password(username, new_password):
 
 def delete_user(username):
     data = load_json("users.json", {"users": []})
+    target = next((u for u in data["users"] if u["username"] == username), None)
+    name = target.get("name", username) if target else username
+    save_snapshot(f"ユーザー削除: {name}（{username}）")
     data["users"] = [u for u in data["users"] if u["username"] != username]
     save_json("users.json", data)
 
