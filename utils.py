@@ -673,6 +673,7 @@ def sidebar_user():
             "🏪 店舗切り替え",
             options=_store_codes,
             index=_idx,
+            format_func=lambda c: get_store_display_name(c),
             key="store_switcher_sidebar",
         )
         if _selected != _cur_code:
@@ -912,3 +913,12 @@ def save_store_settings(**kwargs):
     current = get_store_settings()
     current.update(kwargs)
     save_json(store_path("store_settings.json"), current)
+
+def get_store_display_name(code: str) -> str:
+    """指定した店舗コードの表示名を返す（設定がなければコードをそのまま返す）"""
+    s = load_json(f"{code}/store_settings.json", {})
+    name = s.get("store_name", "")
+    branch = s.get("store_branch", "")
+    if name:
+        return name + (f" {branch}" if branch else "")
+    return code  # 未設定の場合はコードをそのまま表示

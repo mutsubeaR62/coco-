@@ -6,7 +6,7 @@ from utils import (apply_theme, require_admin, page_header,
                    get_progress, STAMPS, ROLE_LABELS, get_employee_type,
                    get_coco_spec, coco_spec_badge, SERVICE_LEVELS, COOKING_LEVELS,
                    get_store_settings, save_store_settings,
-                   get_store_code, update_store_code)
+                   get_store_code, update_store_code, get_store_display_name)
 
 apply_theme()
 require_admin()
@@ -123,9 +123,17 @@ with tab_members:
             st.markdown("**🏪 所属店舗**")
             _ucodes = u.get("store_codes") or [u.get("store_code") or "default"]
             for _sc in _ucodes:
+                _sc_name = get_store_display_name(_sc)
+                _is_primary = _sc == (u.get("store_code") or "default")
                 _sc_col, _sc_del = st.columns([5, 1])
                 with _sc_col:
-                    st.code(_sc, language=None)
+                    _label = f"**{_sc_name}**" if _sc_name != _sc else f"`{_sc}`"
+                    _badge = " ✅ 現在地" if _is_primary else ""
+                    st.markdown(
+                        f"{_label}{_badge}<br>"
+                        f"<span style='font-size:0.75rem;color:#999;'>コード: `{_sc}`</span>",
+                        unsafe_allow_html=True
+                    )
                 with _sc_del:
                     if len(_ucodes) > 1:
                         if st.button("削除", key=f"del_sc_{u['username']}_{_sc}"):
@@ -135,13 +143,15 @@ with tab_members:
                             st.rerun()
             _new_sc_input = st.text_input(
                 "店舗コードを追加", key=f"add_sc_{u['username']}",
-                placeholder="例: store002"
+                placeholder="例: store002　（相手の店舗設定で確認できます）"
             )
             if st.button("＋ 追加", key=f"add_sc_btn_{u['username']}"):
                 _stripped = _new_sc_input.strip()
                 if _stripped and _stripped not in _ucodes:
+                    _added_name = get_store_display_name(_stripped)
                     update_user(u["username"], store_codes=_ucodes + [_stripped])
-                    st.success(f"✅ {_stripped} を追加しました")
+                    _disp = _added_name if _added_name != _stripped else _stripped
+                    st.success(f"✅ {_disp}（コード: {_stripped}）を追加しました")
                     st.rerun()
                 elif _stripped in _ucodes:
                     st.warning("すでに所属している店舗コードです。")
@@ -328,7 +338,17 @@ with tab_store:
     st.markdown("#### 店舗コードの設定")
     st.caption("店舗コードは他の店舗とデータを分けるための識別子です。スタッフが登録するときに使います。")
     _cur_sc = get_store_code()
-    st.info(f"現在の店舗コード: **{_cur_sc}**")
+    st.markdown(
+        f"<div style='background:#fff3e0;border-left:4px solid #e85d04;border-radius:8px;"
+        f"padding:14px 20px;margin-bottom:12px;'>"
+        f"<div style='font-size:0.8rem;color:#888;margin-bottom:4px;'>このアプリの店舗コード</div>"
+        f"<div style='font-size:1.6rem;font-weight:700;letter-spacing:2px;color:#e85d04;'>"
+        f"{_cur_sc}</div>"
+        f"<div style='font-size:0.78rem;color:#666;margin-top:6px;'>"
+        f"他の店舗のスタッフをマルチ店舗で追加するときは、このコードを相手の管理者に伝えてください。</div>"
+        f"</div>",
+        unsafe_allow_html=True
+    )
 
     with st.form("store_code_form"):
         _new_sc = st.text_input("新しい店舗コード",

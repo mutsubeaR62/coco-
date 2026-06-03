@@ -4,7 +4,8 @@ import streamlit as st
 from datetime import datetime
 from utils import (apply_theme, require_login, page_header, get_progress,
                    STAMPS, ROLE_LABELS, get_today_birthdays, coco_spec_badge,
-                   get_coco_spec, is_manager, get_all_users, load_json, save_json, store_path)
+                   get_coco_spec, is_manager, get_all_users, load_json, save_json, store_path,
+                   get_store_settings)
 
 apply_theme()
 require_login()
@@ -15,9 +16,14 @@ role = user.get("role", "new")
 progress = get_progress(username)
 earned_stamps = set(progress.get("stamps", []))
 
+_store = get_store_settings()
+_store_name = _store.get("store_name", "CoCo壱番屋")
+_store_branch = _store.get("store_branch", "")
+_store_full = _store_name + (f" {_store_branch}" if _store_branch else "")
+
 page_header(
     f"おかえり、{user['name']}さん！ 🍛",
-    f"今日も一日よろしく！ — {datetime.now().strftime('%Y年%m月%d日 (%a)')}"
+    f"{_store_full} — {datetime.now().strftime('%Y年%m月%d日 (%a)')}"
 )
 
 # ─── 誕生日バナー ─────────────────────────────────────────────
