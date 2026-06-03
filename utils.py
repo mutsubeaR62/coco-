@@ -251,13 +251,13 @@ STAMPS = {
 }
 
 ROLE_LABELS = {
-    "admin":  "👑 管理者",
-    "daiko":  "🔑 代行",
-    "mate":   "🏪 メイト",
-    "kenshu": "🌱 研修",
+    "admin":  "管理者",
+    "daiko":  "代行",
+    "mate":   "メイト",
+    "kenshu": "研修",
     # 旧ロール互換
-    "staff": "🏪 メイト",
-    "new":   "🌱 研修",
+    "staff": "メイト",
+    "new":   "研修",
 }
 
 def is_manager(user):
