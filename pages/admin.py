@@ -118,6 +118,34 @@ with tab_members:
                         st.warning(f"{u['name']}さんを削除しました。")
                         st.rerun()
 
+            # ── 所属店舗管理 ──────────────────────────────────
+            st.markdown("---")
+            st.markdown("**🏪 所属店舗**")
+            _ucodes = u.get("store_codes") or [u.get("store_code") or "default"]
+            for _sc in _ucodes:
+                _sc_col, _sc_del = st.columns([5, 1])
+                with _sc_col:
+                    st.code(_sc, language=None)
+                with _sc_del:
+                    if len(_ucodes) > 1:
+                        if st.button("削除", key=f"del_sc_{u['username']}_{_sc}"):
+                            _new_codes = [c for c in _ucodes if c != _sc]
+                            _new_primary = u.get("store_code") if u.get("store_code") in _new_codes else _new_codes[0]
+                            update_user(u["username"], store_codes=_new_codes, store_code=_new_primary)
+                            st.rerun()
+            _new_sc_input = st.text_input(
+                "店舗コードを追加", key=f"add_sc_{u['username']}",
+                placeholder="例: store002"
+            )
+            if st.button("＋ 追加", key=f"add_sc_btn_{u['username']}"):
+                _stripped = _new_sc_input.strip()
+                if _stripped and _stripped not in _ucodes:
+                    update_user(u["username"], store_codes=_ucodes + [_stripped])
+                    st.success(f"✅ {_stripped} を追加しました")
+                    st.rerun()
+                elif _stripped in _ucodes:
+                    st.warning("すでに所属している店舗コードです。")
+
     st.divider()
     st.markdown("#### 新しいメンバーを追加")
     with st.form("add_member"):

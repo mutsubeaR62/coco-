@@ -376,6 +376,10 @@ def _migrate_to_store_scope():
         if not u.get("store_code"):
             u["store_code"] = "default"
             changed = True
+        # store_codes リストがなければ store_code から作成
+        if not u.get("store_codes"):
+            u["store_codes"] = [u.get("store_code") or "default"]
+            changed = True
     if changed:
         try:
             save_json("users.json", data)
@@ -397,6 +401,10 @@ def update_store_code(old_code: str, new_code: str):
     for u in data["users"]:
         if (u.get("store_code") or "default") == old_code:
             u["store_code"] = new_code
+        # store_codes リスト内の old_code も新しいコードに置き換える
+        old_codes = u.get("store_codes") or [u.get("store_code") or "default"]
+        if old_code in old_codes:
+            u["store_codes"] = [new_code if c == old_code else c for c in old_codes]
     save_json("users.json", data)
     for fname in _STORE_FILES:
         old_data = _load_json_cached(f"{old_code}/{fname}")
@@ -424,7 +432,7 @@ def init_default_users():
             {"username": "manager", "password": _hash("coco1234"), "name": "店長",
              "role": "admin", "employee_type": "seishain", "hourly_wage": 1500,
              "birthday": "", "coco_spec": {"service": None, "cooking": None},
-             "store_code": "default", "joined": "2020-04-01"},
+             "store_code": "default", "store_codes": ["default"], "joined": "2020-04-01"},
         ]
         try:
             save_json("users.json", {"users": defaults})
@@ -443,10 +451,13 @@ def login_user(username, password):
     return None
 
 def get_all_users():
-    """現在の店舗コードに属するユーザーのみ返す"""
+    """現在の店舗コードに属するユーザーのみ返す（複数店舗所属も考慮）"""
     all_users = load_json("users.json", {"users": []}).get("users", [])
     code = get_store_code()
-    return [u for u in all_users if (u.get("store_code") or "default") == code]
+    def _in_store(u):
+        codes = u.get("store_codes") or [u.get("store_code") or "default"]
+        return code in codes
+    return [u for u in all_users if _in_store(u)]
 
 def get_all_users_global():
     """全店舗のユーザーを返す（ログイン・Cookie復元用）"""
@@ -486,6 +497,7 @@ def add_user(username, password, name, role, store_code=None,
         "birthday": "",
         "coco_spec": {"service": None, "cooking": None},
         "store_code": store_code or get_store_code(),
+        "store_codes": [store_code or get_store_code()],
         "secret_question": secret_question or "",
         "secret_answer": _hash(secret_answer.strip().lower()) if secret_answer else "",
         "joined": datetime.now().strftime("%Y-%m-%d"),
@@ -530,7 +542,8 @@ def update_user(username, **kwargs):
     for u in data["users"]:
         if u["username"] == username:
             for field in ("role", "name", "employee_type", "hourly_wage",
-                          "birthday", "coco_spec", "secret_question", "goal"):
+                          "birthday", "coco_spec", "secret_question", "goal",
+                          "store_code", "store_codes"):
                 if field in kwargs:
                     u[field] = kwargs[field]
             if "password" in kwargs:
@@ -538,6 +551,25 @@ def update_user(username, **kwargs):
             if "secret_answer" in kwargs and kwargs["secret_answer"]:
                 u["secret_answer"] = _hash(kwargs["secret_answer"].strip().lower())
     save_json("users.json", data)
+
+def switch_store(new_code: str):
+    """現在のユーザーのアクティブ店舗を切り替える（セッション＋DB両方更新）"""
+    user = st.session_state.get("user")
+    if not user or new_code == user.get("store_code"):
+        return
+    user["store_code"] = new_code
+    st.session_state.user = user
+    # users.json にも保存して次回ログイン時も引き継ぐ
+    data = load_json("users.json", {"users": []})
+    for u in data["users"]:
+        if u["username"] == user["username"]:
+            u["store_code"] = new_code
+            break
+    try:
+        save_json("users.json", data)
+    except Exception:
+        pass
+    _load_json_cached.clear()
 
 # ─── 進捗管理 ─────────────────────────────────────────────────
 def get_progress(username):
@@ -631,6 +663,21 @@ def sidebar_user():
   <div style="font-size:0.72rem;color:#888;margin-top:4px;">{store_line}</div>
 </div>
 """, unsafe_allow_html=True)
+
+    # 複数店舗所属の場合は切り替えセレクトボックスを表示
+    _store_codes = user.get("store_codes") or [user.get("store_code") or "default"]
+    if len(_store_codes) > 1:
+        _cur_code = user.get("store_code") or "default"
+        _idx = _store_codes.index(_cur_code) if _cur_code in _store_codes else 0
+        _selected = st.sidebar.selectbox(
+            "🏪 店舗切り替え",
+            options=_store_codes,
+            index=_idx,
+            key="store_switcher_sidebar",
+        )
+        if _selected != _cur_code:
+            switch_store(_selected)
+            st.rerun()
     st.sidebar.markdown("""
 <style>
 /* ログアウトボタン */
