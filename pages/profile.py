@@ -141,45 +141,49 @@ st.divider()
 # ─── 他メンバーのCoCoスペ一覧（管理者のみ） ─────────────────────
 if is_admin:
     st.markdown("### 全メンバーのCoCoスペ一覧")
+    st.caption("接客・調理のセルを直接クリックして編集できます。編集後は「変更を保存」を押してください。")
 
-    rows = []
+    import pandas as pd
+
+    _svc_opts  = ["未取得"] + [x for x in SERVICE_LEVELS if x]
+    _ckng_opts = ["未取得"] + [x for x in COOKING_LEVELS if x]
+    _emp_opts  = ["バイト", "社員"]
+
+    _rows = []
     for u in all_users:
         sp = get_coco_spec(u)
-        rows.append({
-            "名前": u.get("name", ""),
-            "接客": sp.get("service") or "—",
-            "調理": sp.get("cooking") or "—",
+        _rows.append({
+            "_username": u["username"],
+            "名前":     u.get("name", ""),
+            "接客":     sp.get("service") or "未取得",
+            "調理":     sp.get("cooking") or "未取得",
             "雇用形態": "バイト" if get_employee_type(u) == "baito" else "社員",
         })
 
-    import pandas as pd
-    df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    _df = pd.DataFrame(_rows)
+    _display_df = _df.drop(columns=["_username"])
 
-    st.divider()
-    st.markdown("#### メンバーのCoCoスペを更新")
-    user_opts = {u["name"]: u["username"] for u in all_users}
-    target_name = st.selectbox("対象メンバー", list(user_opts.keys()), key="spec_target")
-    target_uname = user_opts[target_name]
-    target_user = next((u for u in all_users if u["username"] == target_uname), {})
-    tspec = get_coco_spec(target_user)
+    _edited = st.data_editor(
+        _display_df,
+        column_config={
+            "名前":     st.column_config.TextColumn("名前", disabled=True),
+            "接客":     st.column_config.SelectboxColumn("接客", options=_svc_opts),
+            "調理":     st.column_config.SelectboxColumn("調理", options=_ckng_opts),
+            "雇用形態": st.column_config.SelectboxColumn("雇用形態", options=_emp_opts),
+        },
+        hide_index=True,
+        use_container_width=True,
+        key="coco_spec_editor",
+    )
 
-    col_e, col_f = st.columns(2)
-    svc_opts2 = [x if x else "未取得" for x in SERVICE_LEVELS]
-    cur_svc2 = tspec.get("service") or "未取得"
-    new_svc2 = col_e.selectbox("接客レベル", svc_opts2,
-                                index=svc_opts2.index(cur_svc2) if cur_svc2 in svc_opts2 else 0,
-                                key="svc2")
-    ckng_opts2 = [x if x else "未取得" for x in COOKING_LEVELS]
-    cur_ckng2 = tspec.get("cooking") or "未取得"
-    new_ckng2 = col_f.selectbox("調理レベル", ckng_opts2,
-                                 index=ckng_opts2.index(cur_ckng2) if cur_ckng2 in ckng_opts2 else 0,
-                                 key="ckng2")
-
-    if st.button("CoCoスペを更新", type="primary", key="upd_spec"):
-        update_user(target_uname, coco_spec={
-            "service": None if new_svc2 == "未取得" else new_svc2,
-            "cooking": None if new_ckng2 == "未取得" else new_ckng2,
-        })
-        st.success(f"✅ {target_name}さんのCoCoスペを更新しました。")
+    if st.button("変更を保存", type="primary", key="save_spec_table"):
+        for i, row in _edited.iterrows():
+            _uname = _df.iloc[i]["_username"]
+            _svc  = None if row["接客"] == "未取得" else row["接客"]
+            _ckng = None if row["調理"] == "未取得" else row["調理"]
+            _emp  = "baito" if row["雇用形態"] == "バイト" else "seishain"
+            update_user(_uname,
+                        coco_spec={"service": _svc, "cooking": _ckng},
+                        employee_type=_emp)
+        st.success("✅ 変更を保存しました！")
         st.rerun()
