@@ -45,130 +45,127 @@ with tab_members:
     st.markdown("#### メンバー一覧")
     for u in users:
         role_label = ROLE_LABELS.get(u.get("role", "new"), "")
-        is_self = u["username"] == current_username
-        with st.expander(f"{role_label} {u['name']} (@{u['username']}) {'— 自分' if is_self else ''}"):
-            col1, col2 = st.columns(2)
-            with col1:
-                st.write(f"**参加日:** {u.get('joined', '不明')}")
-                st.write(f"**誕生日:** {u.get('birthday', '') or '未設定'}")
-                prog = get_progress(u["username"])
-                scores = prog.get("quiz_scores", [])
-                stamp_count = len(prog.get("stamps", []))
-                st.write(f"**スタンプ:** {stamp_count}/{len(STAMPS)}個")
-                if scores:
-                    st.write(f"**クイズ最高点:** {max(scores)}/10")
-                # CoCoスペ
-                spec = get_coco_spec(u)
-                st.markdown("**CoCoスペ:** " + coco_spec_badge(spec), unsafe_allow_html=True)
-            with col2:
-                _roles = ["kenshu", "mate", "daiko", "admin"]
-                _cur = u.get("role", "kenshu") if u.get("role") in _roles else "mate"
-                new_role = st.selectbox(
-                    "ステータス",
-                    options=_roles,
-                    index=_roles.index(_cur),
-                    format_func=lambda x: ROLE_LABELS.get(x, x),
-                    key=f"role_{u['username']}"
-                )
-                emp_opts = ["baito", "seishain"]
-                new_emp = st.selectbox(
-                    "雇用形態",
-                    options=emp_opts,
-                    index=emp_opts.index(get_employee_type(u)),
-                    format_func=lambda x: "バイト" if x == "baito" else "社員",
-                    key=f"emp_{u['username']}"
-                )
-                new_wage = st.number_input(
-                    "時給 (¥)", value=int(u.get("hourly_wage", 1050)),
-                    step=10, min_value=500, key=f"wage_{u['username']}"
-                )
-                new_bday = st.text_input(
-                    "誕生日", value=u.get("birthday", "") or "",
-                    placeholder="例: 07-15 または 2002-07-15",
-                    key=f"bday_{u['username']}"
-                )
-                # CoCoスペ
-                cur_spec = get_coco_spec(u)
-                svc_opts = [x if x else "未取得" for x in SERVICE_LEVELS]
-                cur_svc = cur_spec.get("service") or "未取得"
-                new_svc = st.selectbox(
-                    "接客レベル", svc_opts,
-                    index=svc_opts.index(cur_svc) if cur_svc in svc_opts else 0,
-                    key=f"svc_{u['username']}"
-                )
-                ckng_opts = [x if x else "未取得" for x in COOKING_LEVELS]
-                cur_ckng = cur_spec.get("cooking") or "未取得"
-                new_ckng = st.selectbox(
-                    "調理レベル", ckng_opts,
-                    index=ckng_opts.index(cur_ckng) if cur_ckng in ckng_opts else 0,
-                    key=f"ckng_{u['username']}"
-                )
-                if st.button("更新", key=f"update_{u['username']}", type="primary"):
-                    update_user(u["username"], role=new_role,
-                                employee_type=new_emp, hourly_wage=new_wage,
-                                birthday=new_bday,
-                                coco_spec={
-                                    "service": None if new_svc == "未取得" else new_svc,
-                                    "cooking": None if new_ckng == "未取得" else new_ckng,
-                                })
-                    st.success(f"{u['name']}さんの情報を更新しました。")
+        is_self    = u["username"] == current_username
+        prog       = get_progress(u["username"])
+        stamp_count = len(prog.get("stamps", []))
+        scores     = prog.get("quiz_scores", [])
+        spec       = get_coco_spec(u)
+
+        with st.expander(f"{role_label}　{u['name']} (@{u['username']}){'　— 自分' if is_self else ''}"):
+
+            # ── 1行目: 参加日 / 誕生日 / スタンプ / CoCoスペ（読み取り専用） ──
+            _info_cols = st.columns([2, 2, 2, 3])
+            _info_cols[0].markdown(f"<div style='font-size:.8rem;color:#888;'>参加日</div><div style='font-size:.9rem;'>{u.get('joined','不明')}</div>", unsafe_allow_html=True)
+            _info_cols[1].markdown(f"<div style='font-size:.8rem;color:#888;'>誕生日</div><div style='font-size:.9rem;'>{u.get('birthday','') or '未設定'}</div>", unsafe_allow_html=True)
+            _info_cols[2].markdown(f"<div style='font-size:.8rem;color:#888;'>スタンプ</div><div style='font-size:.9rem;'>{stamp_count}/{len(STAMPS)}個　{f'/ クイズ {max(scores)}/10' if scores else ''}</div>", unsafe_allow_html=True)
+            _info_cols[3].markdown(f"<div style='font-size:.8rem;color:#888;'>CoCoスペ</div>" + coco_spec_badge(spec), unsafe_allow_html=True)
+
+            st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)
+
+            # ── 2行目: ステータス / 雇用 / 時給 / 接客 / 調理 ──────────────
+            _roles   = ["kenshu", "mate", "daiko", "admin"]
+            _cur_role = u.get("role", "kenshu") if u.get("role") in _roles else "mate"
+            _emp_opts = ["baito", "seishain"]
+
+            _ec1, _ec2, _ec3, _ec4, _ec5 = st.columns([2, 2, 2, 2, 2])
+            new_role = _ec1.selectbox("ステータス", _roles,
+                index=_roles.index(_cur_role),
+                format_func=lambda x: ROLE_LABELS.get(x, x),
+                key=f"role_{u['username']}")
+            new_emp = _ec2.selectbox("雇用形態", _emp_opts,
+                index=_emp_opts.index(get_employee_type(u)),
+                format_func=lambda x: "バイト" if x == "baito" else "社員",
+                key=f"emp_{u['username']}")
+            new_wage = _ec3.number_input("時給 (¥)", value=int(u.get("hourly_wage", 1050)),
+                step=10, min_value=500, key=f"wage_{u['username']}")
+            _svc_opts  = [x if x else "未取得" for x in SERVICE_LEVELS]
+            _ckng_opts = [x if x else "未取得" for x in COOKING_LEVELS]
+            _cur_svc  = spec.get("service") or "未取得"
+            _cur_ckng = spec.get("cooking") or "未取得"
+            new_svc  = _ec4.selectbox("接客", _svc_opts,
+                index=_svc_opts.index(_cur_svc) if _cur_svc in _svc_opts else 0,
+                key=f"svc_{u['username']}")
+            new_ckng = _ec5.selectbox("調理", _ckng_opts,
+                index=_ckng_opts.index(_cur_ckng) if _cur_ckng in _ckng_opts else 0,
+                key=f"ckng_{u['username']}")
+
+            # ── 3行目: 誕生日 / ボタン ───────────────────────────────────
+            _bc1, _bc2, _bc3 = st.columns([3, 1, 1])
+            new_bday = _bc1.text_input("誕生日", value=u.get("birthday", "") or "",
+                placeholder="例: 07-15 または 2002-07-15", key=f"bday_{u['username']}")
+            with _bc2:
+                st.markdown("<div style='margin-top:26px'></div>", unsafe_allow_html=True)
+                if st.button("更新", key=f"update_{u['username']}", type="primary", use_container_width=True):
+                    update_user(u["username"], role=new_role, employee_type=new_emp,
+                                hourly_wage=new_wage, birthday=new_bday,
+                                coco_spec={"service": None if new_svc == "未取得" else new_svc,
+                                           "cooking": None if new_ckng == "未取得" else new_ckng})
+                    st.success(f"✅ {u['name']}さんを更新しました。")
                     st.rerun()
+            with _bc3:
+                st.markdown("<div style='margin-top:26px'></div>", unsafe_allow_html=True)
                 if not is_self:
                     _del_key = f"confirm_del_{u['username']}"
                     if not st.session_state.get(_del_key):
-                        if st.button("🗑️ 削除", key=f"del_{u['username']}"):
+                        if st.button("🗑️ 削除", key=f"del_{u['username']}", use_container_width=True):
                             st.session_state[_del_key] = True
                             st.rerun()
                     else:
-                        st.warning(f"⚠️ **{u['name']}さんを本当に削除しますか？**　この操作は取り消せません。")
-                        _c1, _c2 = st.columns(2)
-                        if _c1.button("はい、削除する", key=f"del_yes_{u['username']}", type="primary"):
+                        st.warning(f"**{u['name']}さんを削除しますか？**")
+                        _dc1, _dc2 = st.columns(2)
+                        if _dc1.button("はい", key=f"del_yes_{u['username']}", type="primary"):
                             save_snapshot(f"ユーザー削除: {u['name']}")
                             delete_user(u["username"])
                             st.session_state.pop(_del_key, None)
-                            st.success(f"{u['name']}さんを削除しました。")
                             st.rerun()
-                        if _c2.button("キャンセル", key=f"del_no_{u['username']}"):
+                        if _dc2.button("キャンセル", key=f"del_no_{u['username']}"):
                             st.session_state.pop(_del_key, None)
                             st.rerun()
 
-            # ── 所属店舗管理 ──────────────────────────────────
-            st.markdown("---")
-            st.markdown("**🏪 所属店舗**")
+            # ── 所属店舗（タグ形式） ────────────────────────────────────
+            st.markdown("<div style='margin-top:8px'></div>", unsafe_allow_html=True)
             _ucodes = u.get("store_codes") or [u.get("store_code") or "default"]
+            _primary = u.get("store_code") or "default"
+
+            # タグHTMLを組み立て
+            _tag_html = "<div style='display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;'>"
+            _tag_html += "<span style='font-size:.8rem;color:#888;font-weight:600;'>🏪 所属店舗:</span>"
             for _sc in _ucodes:
-                _sc_name = get_store_display_name(_sc)
-                _is_primary = _sc == (u.get("store_code") or "default")
-                _sc_col, _sc_del = st.columns([5, 1])
-                with _sc_col:
-                    _label = f"**{_sc_name}**" if _sc_name != _sc else f"`{_sc}`"
-                    _badge = " ✅ 現在地" if _is_primary else ""
-                    st.markdown(
-                        f"{_label}{_badge}<br>"
-                        f"<span style='font-size:0.75rem;color:#999;'>コード: `{_sc}`</span>",
-                        unsafe_allow_html=True
-                    )
-                with _sc_del:
-                    if len(_ucodes) > 1:
-                        if st.button("削除", key=f"del_sc_{u['username']}_{_sc}"):
-                            _new_codes = [c for c in _ucodes if c != _sc]
-                            _new_primary = u.get("store_code") if u.get("store_code") in _new_codes else _new_codes[0]
-                            update_user(u["username"], store_codes=_new_codes, store_code=_new_primary)
-                            st.rerun()
-            _new_sc_input = st.text_input(
-                "店舗コードを追加", key=f"add_sc_{u['username']}",
-                placeholder="例: store002　（相手の店舗設定で確認できます）"
-            )
-            if st.button("＋ 追加", key=f"add_sc_btn_{u['username']}"):
-                _stripped = _new_sc_input.strip()
-                if _stripped and _stripped not in _ucodes:
-                    _added_name = get_store_display_name(_stripped)
-                    update_user(u["username"], store_codes=_ucodes + [_stripped])
-                    _disp = _added_name if _added_name != _stripped else _stripped
-                    st.success(f"✅ {_disp}（コード: {_stripped}）を追加しました")
-                    st.rerun()
-                elif _stripped in _ucodes:
-                    st.warning("すでに所属している店舗コードです。")
+                _sc_disp = get_store_display_name(_sc)
+                _sc_label = f"{_sc_disp}{'　✅' if _sc == _primary else ''}"
+                _sc_sub = f" ({_sc})" if _sc_disp != _sc else ""
+                _tag_html += (
+                    f"<span style='background:{'#fff3e0' if _sc==_primary else '#f0f0f0'};"
+                    f"border:1px solid {'#e85d04' if _sc==_primary else '#ccc'};"
+                    f"border-radius:20px;padding:3px 10px;font-size:.82rem;color:{'#e85d04' if _sc==_primary else '#555'};'>"
+                    f"{_sc_label}{_sc_sub}</span>"
+                )
+            _tag_html += "</div>"
+            st.markdown(_tag_html, unsafe_allow_html=True)
+
+            # 追加・削除コントロール
+            _sa1, _sa2, _sa3 = st.columns([3, 1, 1])
+            _new_sc_val = _sa1.text_input("店舗コードを追加", key=f"add_sc_{u['username']}",
+                placeholder="店舗コードを入力（相手の店舗設定で確認）",
+                label_visibility="collapsed")
+            with _sa2:
+                if st.button("＋ 追加", key=f"add_sc_btn_{u['username']}", use_container_width=True):
+                    _stripped = _new_sc_val.strip()
+                    if _stripped and _stripped not in _ucodes:
+                        update_user(u["username"], store_codes=_ucodes + [_stripped])
+                        st.success(f"✅ {_stripped} を追加しました")
+                        st.rerun()
+                    elif _stripped in _ucodes:
+                        st.warning("すでに所属しています。")
+            with _sa3:
+                if len(_ucodes) > 1:
+                    _rm_opts = [c for c in _ucodes if c != _primary]
+                    _rm_sel = st.selectbox("削除する店舗", _rm_opts,
+                        key=f"rm_sc_sel_{u['username']}", label_visibility="collapsed")
+                    if st.button("削除", key=f"rm_sc_btn_{u['username']}", use_container_width=True):
+                        _new_codes = [c for c in _ucodes if c != _rm_sel]
+                        update_user(u["username"], store_codes=_new_codes)
+                        st.rerun()
 
     st.divider()
     st.markdown("#### 新しいメンバーを追加")
