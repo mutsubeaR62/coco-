@@ -103,43 +103,6 @@ else:
 
 st.divider()
 
-# ─── ログインID変更 ────────────────────────────────────────────
-st.markdown("### 🔑 ログインID変更")
-
-with st.form("change_username_form"):
-    st.caption(f"現在のID: **{username}**")
-    col_u1, col_u2 = st.columns(2)
-    with col_u1:
-        new_un = st.text_input("新しいID", placeholder="半角英数字・アンダースコアのみ")
-    with col_u2:
-        confirm_pw = st.text_input("現在のパスワード（確認）", type="password")
-    if st.form_submit_button("IDを変更する"):
-        if not new_un:
-            st.error("新しいIDを入力してください。")
-        elif not confirm_pw:
-            st.error("パスワードを入力してください。")
-        else:
-            import hashlib as _hl
-            pw_hash = _hl.sha256(confirm_pw.encode()).hexdigest()
-            if me.get("password") != pw_hash:
-                st.error("パスワードが違います。")
-            else:
-                ok, err = change_username(username, new_un)
-                if ok:
-                    # Cookie のユーザー名も更新
-                    try:
-                        import extra_streamlit_components as stx
-                        _cm = stx.CookieManager(key="profile_cm")
-                        _cm.set("coco_login", new_un)
-                    except Exception:
-                        pass
-                    st.success(f"✅ IDを「{new_un}」に変更しました！")
-                    st.rerun()
-                else:
-                    st.error(f"❌ {err}")
-
-st.divider()
-
 # ─── プロフィール編集 ──────────────────────────────────────────
 st.markdown("### プロフィール編集")
 
@@ -209,6 +172,42 @@ with st.form("edit_profile"):
         st.session_state.user["name"] = new_name
         st.success("✅ プロフィールを更新しました！")
         st.rerun()
+
+st.divider()
+
+# ─── ログインID変更 ────────────────────────────────────────────
+st.markdown("### 🔑 ログインID変更")
+
+with st.form("change_username_form"):
+    st.caption(f"現在のID: **{username}**")
+    col_u1, col_u2 = st.columns(2)
+    with col_u1:
+        new_un = st.text_input("新しいID", placeholder="半角英数字・アンダースコアのみ")
+    with col_u2:
+        confirm_pw = st.text_input("現在のパスワード（確認）", type="password")
+    if st.form_submit_button("IDを変更する"):
+        if not new_un:
+            st.error("新しいIDを入力してください。")
+        elif not confirm_pw:
+            st.error("パスワードを入力してください。")
+        else:
+            import hashlib as _hl
+            pw_hash = _hl.sha256(confirm_pw.encode()).hexdigest()
+            if me.get("password") != pw_hash:
+                st.error("パスワードが違います。")
+            else:
+                ok, err = change_username(username, new_un)
+                if ok:
+                    try:
+                        import extra_streamlit_components as stx
+                        _cm = stx.CookieManager(key="profile_cm")
+                        _cm.set("coco_login", new_un)
+                    except Exception:
+                        pass
+                    st.success(f"✅ IDを「{new_un}」に変更しました！")
+                    st.rerun()
+                else:
+                    st.error(f"❌ {err}")
 
 st.divider()
 
