@@ -3,7 +3,7 @@ import fitz  # pymupdf
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 from utils import (apply_theme, require_login, page_header, load_json, save_json,
-                   get_progress, save_progress, award_stamps, show_new_stamps,
+                   store_path, get_progress, save_progress, award_stamps, show_new_stamps,
                    is_manager, render_attachments, upload_attachment_ui)
 
 apply_theme()
@@ -307,9 +307,9 @@ SAUCE_DATA = [
 ]
 
 def get_manual():
-    data = load_json("manual.json")
+    data = load_json(store_path("manual.json"))
     if not data.get("sections"):
-        save_json("manual.json", DEFAULT_MANUAL)
+        save_json(store_path("manual.json"), DEFAULT_MANUAL)
         return DEFAULT_MANUAL
     return data
 
@@ -682,7 +682,7 @@ with tab_general:
                 help="現在の内容を削除してデフォルトデータに戻します",
                 type="secondary",
             ):
-                save_json("manual.json", DEFAULT_MANUAL)
+                save_json(store_path("manual.json"), DEFAULT_MANUAL)
                 st.success("✅ デフォルトデータに戻しました！")
                 st.rerun()
 
@@ -702,14 +702,14 @@ with tab_general:
                             sections[i]["icon"]    = new_icon
                             sections[i]["content"] = new_content
                             manual["sections"] = sections
-                            save_json("manual.json", manual)
+                            save_json(store_path("manual.json"), manual)
                             st.success("保存しました！")
                             st.rerun()
                     with col2:
                         if st.button("🗑️ 削除", key=f"del_{i}"):
                             sections.pop(i)
                             manual["sections"] = sections
-                            save_json("manual.json", manual)
+                            save_json(store_path("manual.json"), manual)
                             st.warning("削除しました。")
                             st.rerun()
                     st.divider()
@@ -733,7 +733,7 @@ with tab_general:
                             "content": new_content,
                         })
                         manual["sections"] = sections
-                        save_json("manual.json", manual)
+                        save_json(store_path("manual.json"), manual)
                         st.success(f"「{new_title}」を追加しました！")
                         st.rerun()
                     else:
@@ -873,7 +873,7 @@ with tab_teisu:
     st.caption("仕込みや発注の定数を自由に記録・管理できます。行は「＋」ボタンで追加、保存ボタンで確定されます。")
 
     def get_teisu():
-        data = load_json("teisu_table.json", {})
+        data = load_json(store_path("teisu_table.json"), {})
         if not data.get("columns"):
             return {"columns": ["品目", "規定量", "単位", "備考"], "rows": []}
         return data
@@ -894,7 +894,7 @@ with tab_teisu:
                         t_columns.append(new_col_name)
                         for r in t_rows:
                             r.setdefault(new_col_name, "")
-                        save_json("teisu_table.json", {"columns": t_columns, "rows": t_rows})
+                        save_json(store_path("teisu_table.json"), {"columns": t_columns, "rows": t_rows})
                         st.success(f"「{new_col_name}」列を追加しました。")
                         st.rerun()
                     elif new_col_name in t_columns:
@@ -907,7 +907,7 @@ with tab_teisu:
                         t_columns = [c for c in t_columns if c != del_col_name]
                         for r in t_rows:
                             r.pop(del_col_name, None)
-                        save_json("teisu_table.json", {"columns": t_columns, "rows": t_rows})
+                        save_json(store_path("teisu_table.json"), {"columns": t_columns, "rows": t_rows})
                         st.success(f"「{del_col_name}」列を削除しました。")
                         st.rerun()
                 else:
@@ -939,7 +939,7 @@ with tab_teisu:
                 row for row in edited.to_dict("records")
                 if any(str(v).strip() for v in row.values())
             ]
-            save_json("teisu_table.json", {"columns": t_columns, "rows": new_rows})
+            save_json(store_path("teisu_table.json"), {"columns": t_columns, "rows": new_rows})
             st.success("保存しました！")
             st.rerun()
     else:

@@ -5,7 +5,8 @@ from utils import (apply_theme, require_admin, page_header,
                    get_all_users, add_user, delete_user, update_user,
                    get_progress, STAMPS, ROLE_LABELS, get_employee_type,
                    get_coco_spec, coco_spec_badge, SERVICE_LEVELS, COOKING_LEVELS,
-                   get_store_settings, save_store_settings)
+                   get_store_settings, save_store_settings,
+                   get_store_code, update_store_code)
 
 apply_theme()
 require_admin()
@@ -294,3 +295,24 @@ with tab_store:
         st.write(f"住所: {store['address']}")
     if store.get("tel"):
         st.write(f"電話: {store['tel']}")
+
+    st.divider()
+    st.markdown("#### 店舗コードの設定")
+    st.caption("店舗コードは他の店舗とデータを分けるための識別子です。スタッフが登録するときに使います。")
+    _cur_sc = get_store_code()
+    st.info(f"現在の店舗コード: **{_cur_sc}**")
+
+    with st.form("store_code_form"):
+        _new_sc = st.text_input("新しい店舗コード",
+                                 placeholder="例: toyota01 / nagoya_honcho",
+                                 help="半角英数字・アンダースコア推奨。変更すると全メンバーと全データが新コードに移行されます。")
+        if st.form_submit_button("店舗コードを変更", type="primary"):
+            if not _new_sc.strip():
+                st.error("コードを入力してください。")
+            elif _new_sc.strip() == _cur_sc:
+                st.warning("現在と同じコードです。")
+            else:
+                update_store_code(_cur_sc, _new_sc.strip())
+                st.session_state.user["store_code"] = _new_sc.strip()
+                st.success(f"✅ 店舗コードを「{_new_sc.strip()}」に変更しました。全メンバーとデータを移行しました。")
+                st.rerun()

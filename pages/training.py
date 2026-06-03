@@ -4,7 +4,7 @@ import streamlit as st
 import random
 from utils import (apply_theme, require_login, page_header, get_progress, save_progress,
                    award_stamps, show_new_stamps, STAMPS, load_json, save_json,
-                   get_all_users, ROLE_LABELS)
+                   store_path, get_all_users, ROLE_LABELS)
 
 apply_theme()
 require_login()
@@ -154,17 +154,17 @@ DEFAULT_GRADUATION_TEMPLATE = {
 }
 
 def get_graduation_template():
-    data = load_json("graduation_template.json", {})
+    data = load_json(store_path("graduation_template.json"), {})
     if not data.get("categories"):
-        save_json("graduation_template.json", DEFAULT_GRADUATION_TEMPLATE)
+        save_json(store_path("graduation_template.json"), DEFAULT_GRADUATION_TEMPLATE)
         return DEFAULT_GRADUATION_TEMPLATE["categories"]
     return data["categories"]
 
 def get_training_checks():
-    return load_json("training_check.json", {})
+    return load_json(store_path("training_check.json"), {})
 
 def save_training_checks(data):
-    save_json("training_check.json", data)
+    save_json(store_path("training_check.json"), data)
 
 # セッション初期化
 def init_session():
@@ -334,7 +334,7 @@ if role != "kenshu":
 </style>
 """, unsafe_allow_html=True)
 
-            tmpl = load_json("graduation_template.json", DEFAULT_GRADUATION_TEMPLATE)
+            tmpl = load_json(store_path("graduation_template.json"), DEFAULT_GRADUATION_TEMPLATE)
             cats = tmpl.get("categories", DEFAULT_GRADUATION_TEMPLATE["categories"])
 
             import pandas as pd
@@ -357,7 +357,7 @@ if role != "kenshu":
                                  help="このカテゴリごと削除"):
                         num_cats_before = len(cats)
                         cats.pop(ci)
-                        save_json("graduation_template.json", {"categories": cats})
+                        save_json(store_path("graduation_template.json"), {"categories": cats})
                         # カテゴリ削除後のセッションステートをクリア
                         for cj in range(ci, num_cats_before):
                             for k in (f"catname_{cj}", f"items_editor_{cj}", f"cat_del_{cj}"):
@@ -396,12 +396,12 @@ if role != "kenshu":
             if new_cat_input:
                 import uuid
                 cats.append({"id": uuid.uuid4().hex[:8], "name": new_cat_input, "items": []})
-                save_json("graduation_template.json", {"categories": cats})
+                save_json(store_path("graduation_template.json"), {"categories": cats})
                 st.rerun()
 
             st.write("")
             if st.button("変更を保存", type="primary", key="save_tmpl"):
-                save_json("graduation_template.json", {"categories": cats})
+                save_json(store_path("graduation_template.json"), {"categories": cats})
                 st.success("保存しました！")
                 st.rerun()
 

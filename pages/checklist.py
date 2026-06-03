@@ -6,7 +6,7 @@ from datetime import datetime
 from utils import (apply_theme, require_login, page_header, load_json, save_json,
                    get_progress, save_progress, award_stamps, show_new_stamps,
                    is_manager, render_attachments, upload_attachment_ui,
-                   get_all_users, ROLE_LABELS)
+                   store_path, get_all_users, ROLE_LABELS)
 
 apply_theme()
 require_login()
@@ -139,9 +139,9 @@ with tab_daily:
     }
 
     def get_checklists():
-        data = load_json("checklists.json")
+        data = load_json(store_path("checklists.json"))
         if not data.get("checklists"):
-            save_json("checklists.json", DEFAULT_CHECKLISTS)
+            save_json(store_path("checklists.json"), DEFAULT_CHECKLISTS)
             return DEFAULT_CHECKLISTS["checklists"]
         return data["checklists"]
 
@@ -229,7 +229,7 @@ with tab_daily:
     if _is_manager:
         st.divider()
         with st.expander("📎 ファイル添付（管理者・代行）"):
-            cl_data = load_json("checklists.json", DEFAULT_CHECKLISTS)
+            cl_data = load_json(store_path("checklists.json"), DEFAULT_CHECKLISTS)
             for cl_item in cl_data.get("checklists", []):
                 st.markdown(f"**{cl_item['icon']} {cl_item['name']}**")
                 render_attachments("checklist", cl_item["id"], allow_delete=True)
@@ -239,7 +239,7 @@ with tab_daily:
     if role in ("admin", "daiko"):
         st.divider()
         with st.expander("⚙️ チェックリスト編集（管理者）"):
-            data = load_json("checklists.json", DEFAULT_CHECKLISTS)
+            data = load_json(store_path("checklists.json"), DEFAULT_CHECKLISTS)
             all_cls = data.get("checklists", [])
             for ci, cl in enumerate(all_cls):
                 st.markdown(f"##### {cl['icon']} {cl['name']}")
@@ -263,7 +263,7 @@ with tab_daily:
                 ]
 
             if st.button("変更を保存", type="primary", key="cl_save"):
-                save_json("checklists.json", {"checklists": all_cls})
+                save_json(store_path("checklists.json"), {"checklists": all_cls})
                 st.success("保存しました！")
                 st.rerun()
 
@@ -274,18 +274,18 @@ with tab_daily:
 with tab_stepup:
 
     def get_stepup_data():
-        return load_json("stepup_data.json", {"stages": []})
+        return load_json(store_path("stepup_data.json"), {"stages": []})
 
     def save_stepup_data(data):
-        save_json("stepup_data.json", data)
+        save_json(store_path("stepup_data.json"), data)
 
     def get_stepup_progress(tgt):
-        return load_json("stepup_progress.json", {}).get(tgt, {})
+        return load_json(store_path("stepup_progress.json"), {}).get(tgt, {})
 
     def save_stepup_progress(tgt, progress):
-        data = load_json("stepup_progress.json", {})
+        data = load_json(store_path("stepup_progress.json"), {})
         data[tgt] = progress
-        save_json("stepup_progress.json", data)
+        save_json(store_path("stepup_progress.json"), data)
 
     def count_stage(stage, prog):
         total = sum(len(s["items"]) for s in stage.get("sections", []))

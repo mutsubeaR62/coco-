@@ -87,10 +87,13 @@ with col:
         st.caption("登録後のステータスは「研修」になります。管理者がステータスを変更します。")
 
         with st.form("register_form"):
-            r_name     = st.text_input("表示名（本名）", placeholder="例: 田中 太郎")
-            r_username = st.text_input("ユーザー名", placeholder="半角英数字のみ 例: tanaka123")
-            r_pw       = st.text_input("パスワード", type="password", placeholder="6文字以上")
-            r_pw2      = st.text_input("パスワード（確認）", type="password", placeholder="もう一度入力")
+            r_name       = st.text_input("表示名（本名）", placeholder="例: 田中 太郎")
+            r_username   = st.text_input("ユーザー名", placeholder="半角英数字のみ 例: tanaka123")
+            r_store_code = st.text_input("店舗コード",
+                                          placeholder="管理者から教えてもらったコードを入力",
+                                          help="所属店舗のコードです。管理者に確認してください。")
+            r_pw         = st.text_input("パスワード", type="password", placeholder="6文字以上")
+            r_pw2        = st.text_input("パスワード（確認）", type="password", placeholder="もう一度入力")
 
             st.markdown("**秘密の質問**（パスワード忘れのときに使います）")
             r_question = st.selectbox("質問を選ぶ", SECRET_QUESTIONS)
@@ -109,7 +112,9 @@ with col:
             elif r_pw != r_pw2:
                 st.error("パスワードが一致しません。")
             else:
+                sc = r_store_code.strip() or "default"
                 ok, err_msg = add_user(r_username, r_pw, r_name, "kenshu",
+                                       store_code=sc,
                                        secret_question=r_question, secret_answer=r_answer)
                 if ok:
                     # 登録完了と同時に自動ログイン

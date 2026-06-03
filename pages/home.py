@@ -4,7 +4,7 @@ import streamlit as st
 from datetime import datetime
 from utils import (apply_theme, require_login, page_header, get_progress,
                    STAMPS, ROLE_LABELS, get_today_birthdays, coco_spec_badge,
-                   get_coco_spec, is_manager, get_all_users, load_json, save_json)
+                   get_coco_spec, is_manager, get_all_users, load_json, save_json, store_path)
 
 apply_theme()
 require_login()
@@ -194,7 +194,7 @@ _DEFAULT_DESC = """\
 | 👤 マイプロフィール | 自分の情報確認・CoCoスペ・目標の設定 |
 | ⚙️ 管理者設定 | メンバー管理・進捗確認・パスワード変更（管理者のみ） |
 """
-_home_info = load_json("home_info.json", {"description": _DEFAULT_DESC})
+_home_info = load_json(store_path("home_info.json"), {"description": _DEFAULT_DESC})
 _desc_text = _home_info.get("description") or _DEFAULT_DESC
 
 with st.expander("このアプリの使い方"):
@@ -205,6 +205,6 @@ with st.expander("このアプリの使い方"):
         _new_desc = st.text_area("説明文", value=_desc_text, height=180,
                                   label_visibility="collapsed", key="home_desc_edit")
         if st.button("説明を保存", key="save_home_desc"):
-            save_json("home_info.json", {"description": _new_desc})
+            save_json(store_path("home_info.json"), {"description": _new_desc})
             st.success("保存しました！")
             st.rerun()
