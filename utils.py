@@ -913,55 +913,71 @@ def coco_spec_badge(spec):
                      f"border-radius:10px;font-size:12px;'>調理 {ckng}</span>")
     return " ".join(parts) if parts else "<span style='color:#999;font-size:12px;'>未設定</span>"
 
-# ─── ファイル添付管理 ──────────────────────────────────────────
-FILES_DIR = os.path.join(DATA_DIR, "files")
+# ─── ファイル添付管理（Supabase Storage） ─────────────────────
+_BUCKET = "manual-files"
 
-def _ensure_files_dir():
-    os.makedirs(FILES_DIR, exist_ok=True)
+def _ext_to_ftype(ext: str) -> str:
+    if ext in (".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"):
+        return "image"
+    if ext in (".mp4", ".avi", ".mov", ".webm", ".mkv"):
+        return "video"
+    if ext == ".pdf":
+        return "pdf"
+    return "file"
 
 def get_attachments(section_type, section_id):
     """section_type: 'manual' | 'checklist'"""
-    data = load_json("file_attachments.json", {})
+    data = load_json(store_path("file_attachments.json"), {})
     return data.get(section_type, {}).get(str(section_id), [])
 
 def save_uploaded_file(uploaded_file):
-    """UploadedFile を保存し (filename, file_type) を返す。"""
+    """Supabase Storage にアップロードし (storage_path, file_type) を返す。"""
     import uuid
-    _ensure_files_dir()
     ext = os.path.splitext(uploaded_file.name)[1].lower()
-    filename = f"{uuid.uuid4().hex}{ext}"
-    with open(os.path.join(FILES_DIR, filename), "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    if ext in (".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"):
-        ftype = "image"
-    elif ext in (".mp4", ".avi", ".mov", ".webm", ".mkv"):
-        ftype = "video"
-    else:
-        ftype = "file"
-    return filename, ftype
+    storage_path = f"{get_store_code()}/{uuid.uuid4().hex}{ext}"
+    sb = _get_supabase()
+    if not sb:
+        raise RuntimeError("Supabase に接続できません。")
+    sb.storage.from_(_BUCKET).upload(
+        storage_path,
+        uploaded_file.getbuffer(),
+        {"content-type": uploaded_file.type or "application/octet-stream"},
+    )
+    return storage_path, _ext_to_ftype(ext)
 
-def add_attachment(section_type, section_id, filename, original_name, file_type):
-    data = load_json("file_attachments.json", {})
+def _storage_public_url(storage_path: str) -> str:
+    sb = _get_supabase()
+    if not sb:
+        return ""
+    res = sb.storage.from_(_BUCKET).get_public_url(storage_path)
+    return res
+
+def add_attachment(section_type, section_id, storage_path, original_name, file_type):
+    data = load_json(store_path("file_attachments.json"), {})
     data.setdefault(section_type, {}).setdefault(str(section_id), [])
     data[section_type][str(section_id)].append({
-        "filename": filename,
+        "filename": storage_path,   # 後方互換のためキー名はそのまま
         "original_name": original_name,
         "type": file_type,
         "uploaded_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
     })
-    save_json("file_attachments.json", data)
+    save_json(store_path("file_attachments.json"), data)
 
-def delete_attachment(section_type, section_id, filename):
-    data = load_json("file_attachments.json", {})
+def delete_attachment(section_type, section_id, storage_path):
+    data = load_json(store_path("file_attachments.json"), {})
     key = str(section_id)
     if section_type in data and key in data[section_type]:
         data[section_type][key] = [
-            a for a in data[section_type][key] if a.get("filename") != filename
+            a for a in data[section_type][key] if a.get("filename") != storage_path
         ]
-    save_json("file_attachments.json", data)
-    fp = os.path.join(FILES_DIR, filename)
-    if os.path.exists(fp):
-        os.remove(fp)
+    save_json(store_path("file_attachments.json"), data)
+    # Supabase Storage からも削除
+    try:
+        sb = _get_supabase()
+        if sb:
+            sb.storage.from_(_BUCKET).remove([storage_path])
+    except Exception:
+        pass
 
 def render_attachments(section_type, section_id, allow_delete=False):
     """添付ファイルを表示する。allow_delete=True なら削除ボタン付き。"""
@@ -970,41 +986,64 @@ def render_attachments(section_type, section_id, allow_delete=False):
         return
     st.markdown("**📎 添付ファイル**")
     for att in attachments:
-        fp = os.path.join(FILES_DIR, att["filename"])
-        if not os.path.exists(fp):
-            continue
+        storage_path = att.get("filename", "")
+        url = _storage_public_url(storage_path) if storage_path else ""
         col_media, col_del = st.columns([10, 1]) if allow_delete else (st, None)
         with col_media:
-            if att["type"] == "image":
-                st.image(fp, caption=att["original_name"], use_container_width=True)
+            if not url:
+                st.caption(f"⚠️ {att.get('original_name','ファイル')} — 読み込めません")
+            elif att["type"] == "image":
+                st.image(url, caption=att["original_name"], use_container_width=True)
             elif att["type"] == "video":
-                st.video(fp)
+                st.video(url)
+            elif att["type"] == "pdf":
+                st.markdown(
+                    f"<a href='{url}' target='_blank' style='display:inline-flex;align-items:center;"
+                    f"gap:6px;background:#fff3e0;border:1px solid #e85d04;color:#e85d04;"
+                    f"padding:8px 16px;border-radius:8px;font-weight:600;text-decoration:none;'>"
+                    f"📄 {att['original_name']} を開く</a>",
+                    unsafe_allow_html=True,
+                )
+                # iframeでプレビュー
+                st.markdown(
+                    f"<iframe src='{url}' width='100%' height='500px' "
+                    f"style='border:1px solid #ddd;border-radius:8px;margin-top:6px;'></iframe>",
+                    unsafe_allow_html=True,
+                )
             else:
-                with open(fp, "rb") as f:
-                    st.download_button(f"📄 {att['original_name']}", f.read(),
-                                       file_name=att["original_name"],
-                                       key=f"dl_{att['filename']}")
+                st.markdown(
+                    f"<a href='{url}' target='_blank' style='display:inline-flex;align-items:center;"
+                    f"gap:6px;background:#f5f5f5;border:1px solid #ddd;color:#333;"
+                    f"padding:8px 16px;border-radius:8px;text-decoration:none;'>"
+                    f"📥 {att['original_name']} をダウンロード</a>",
+                    unsafe_allow_html=True,
+                )
         if allow_delete and col_del:
             with col_del:
-                if st.button("🗑️", key=f"delatc_{section_type}_{section_id}_{att['filename']}",
+                if st.button("🗑️", key=f"delatc_{section_type}_{section_id}_{storage_path}",
                              help="削除"):
-                    delete_attachment(section_type, section_id, att["filename"])
+                    delete_attachment(section_type, section_id, storage_path)
                     st.rerun()
 
 def upload_attachment_ui(section_type, section_id, label="ファイルをアップロード"):
     """管理者用のアップロードUI。"""
     uploaded = st.file_uploader(
         label,
-        type=["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "webm", "pdf", "txt"],
+        type=["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "webm", "pdf"],
         key=f"uploader_{section_type}_{section_id}",
+        help="PDF・画像・動画をアップロードできます（再デプロイ後も消えません）",
     )
     if uploaded:
         if st.button("📤 アップロード", key=f"upload_btn_{section_type}_{section_id}",
                      type="primary"):
-            filename, ftype = save_uploaded_file(uploaded)
-            add_attachment(section_type, section_id, filename, uploaded.name, ftype)
-            st.success(f"✅ {uploaded.name} をアップロードしました。")
-            st.rerun()
+            with st.spinner("アップロード中..."):
+                try:
+                    storage_path, ftype = save_uploaded_file(uploaded)
+                    add_attachment(section_type, section_id, storage_path, uploaded.name, ftype)
+                    st.success(f"✅ {uploaded.name} をアップロードしました！")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ アップロード失敗: {e}")
 
 
 def get_today_birthdays(exclude_username=None):
