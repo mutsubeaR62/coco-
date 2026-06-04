@@ -26,63 +26,6 @@ page_header(
     f"{_store_full} — {datetime.now().strftime('%Y年%m月%d日 (%a)')}"
 )
 
-# ─── モバイル向け：ログインユーザー表示 & ログアウトボタン ─────
-st.markdown(f"""
-<style>
-.mobile-user-bar {{
-    display: none;
-}}
-@media (max-width: 767px) {{
-    .mobile-user-bar {{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: white;
-        border-radius: 12px;
-        padding: 10px 14px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        border-left: 4px solid #e85d04;
-    }}
-    .mobile-user-name {{
-        font-weight: 700;
-        font-size: 0.92rem;
-        color: #1a1a1a;
-    }}
-    .mobile-user-role {{
-        font-size: 0.72rem;
-        color: #888;
-        margin-top: 2px;
-    }}
-}}
-</style>
-<div class="mobile-user-bar">
-  <div>
-    <div class="mobile-user-name">👤 {user['name']}</div>
-    <div class="mobile-user-role">ログイン中 · ID: {username}</div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-# モバイル向けログアウトボタン（スマホのみ表示）
-with st.expander("⚙️ アカウント", expanded=False):
-    st.caption(f"ログイン中: **{user['name']}**（{username}）")
-    col_lo1, col_lo2 = st.columns(2)
-    with col_lo1:
-        if st.button("🚪 ログアウト", use_container_width=True):
-            st.session_state.user = None
-            st.session_state["_logout"] = True
-            try:
-                import extra_streamlit_components as stx
-                _cm2 = stx.CookieManager(key="main_cm")
-                _cm2.delete("coco_login")
-            except Exception:
-                pass
-            st.rerun()
-    with col_lo2:
-        if st.button("👤 プロフィール", use_container_width=True):
-            st.switch_page("pages/profile.py")
-
 # ─── 誕生日バナー ─────────────────────────────────────────────
 _all_users = get_all_users()
 _me = next((u for u in _all_users if u["username"] == username), user)
@@ -285,3 +228,23 @@ with st.expander("このアプリの使い方"):
             save_json(store_path("home_info.json"), {"description": _new_desc})
             st.success("保存しました！")
             st.rerun()
+
+# ─── アカウント（一番下） ──────────────────────────────────────
+st.divider()
+with st.expander("⚙️ アカウント"):
+    st.caption(f"ログイン中: **{user['name']}**（{username}）")
+    col_lo1, col_lo2 = st.columns(2)
+    with col_lo1:
+        if st.button("🚪 ログアウト", use_container_width=True):
+            st.session_state.user = None
+            st.session_state["_logout"] = True
+            try:
+                import extra_streamlit_components as stx
+                _cm2 = stx.CookieManager(key="main_cm")
+                _cm2.delete("coco_login")
+            except Exception:
+                pass
+            st.rerun()
+    with col_lo2:
+        if st.button("👤 プロフィール", use_container_width=True):
+            st.switch_page("pages/profile.py")
