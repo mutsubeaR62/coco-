@@ -26,6 +26,63 @@ page_header(
     f"{_store_full} — {datetime.now().strftime('%Y年%m月%d日 (%a)')}"
 )
 
+# ─── モバイル向け：ログインユーザー表示 & ログアウトボタン ─────
+st.markdown(f"""
+<style>
+.mobile-user-bar {{
+    display: none;
+}}
+@media (max-width: 767px) {{
+    .mobile-user-bar {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        border-radius: 12px;
+        padding: 10px 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        border-left: 4px solid #e85d04;
+    }}
+    .mobile-user-name {{
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #1a1a1a;
+    }}
+    .mobile-user-role {{
+        font-size: 0.72rem;
+        color: #888;
+        margin-top: 2px;
+    }}
+}}
+</style>
+<div class="mobile-user-bar">
+  <div>
+    <div class="mobile-user-name">👤 {user['name']}</div>
+    <div class="mobile-user-role">ログイン中 · ID: {username}</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# モバイル向けログアウトボタン（スマホのみ表示）
+with st.expander("⚙️ アカウント", expanded=False):
+    st.caption(f"ログイン中: **{user['name']}**（{username}）")
+    col_lo1, col_lo2 = st.columns(2)
+    with col_lo1:
+        if st.button("🚪 ログアウト", use_container_width=True):
+            st.session_state.user = None
+            st.session_state["_logout"] = True
+            try:
+                import extra_streamlit_components as stx
+                _cm2 = stx.CookieManager(key="main_cm")
+                _cm2.delete("coco_login")
+            except Exception:
+                pass
+            st.rerun()
+    with col_lo2:
+        if st.button("👤 プロフィール", use_container_width=True):
+            st.switch_page("pages/profile.py")
+
 # ─── 誕生日バナー ─────────────────────────────────────────────
 _all_users = get_all_users()
 _me = next((u for u in _all_users if u["username"] == username), user)
@@ -68,15 +125,29 @@ total_cl = sum(cl.values())
 manual_read = len(progress.get("manual_read", []))
 stamp_count = len(earned_stamps)
 
+st.markdown("""
+<style>
+/* スマホでメトリクスを2列に */
+@media (max-width: 767px) {
+    [data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) {
+        flex-wrap: wrap !important;
+    }
+    [data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) > [data-testid="column"] {
+        min-width: calc(50% - 6px) !important;
+        flex: 1 1 calc(50% - 6px) !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    st.metric("クイズ最高得点", f"{best_score}/10", help="クイズの最高得点")
+    st.metric("クイズ最高", f"{best_score}/10")
 with c2:
-    st.metric("チェックリスト完了", f"{total_cl}回", help="チェックリストを完了した回数")
+    st.metric("チェックリスト", f"{total_cl}回")
 with c3:
-    st.metric("マニュアル既読", f"{manual_read}セクション", help="読んだマニュアルの数")
+    st.metric("マニュアル既読", f"{manual_read}件")
 with c4:
-    st.metric("スタンプ", f"{stamp_count}/{len(STAMPS)}個", help="獲得したスタンプ数")
+    st.metric("スタンプ", f"{stamp_count}/{len(STAMPS)}")
 
 st.divider()
 

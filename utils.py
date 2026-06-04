@@ -142,6 +142,30 @@ section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
     /* サイドバーユーザーカード */
     .sidebar-user       { padding: 9px 11px !important; }
     .sidebar-user .name { font-size: 0.93rem !important; }
+
+    /* フォームのラベル */
+    [data-testid="stForm"] label {
+        font-size: 0.85rem !important;
+    }
+
+    /* エクスパンダー */
+    [data-testid="stExpander"] summary {
+        font-size: 0.9rem !important;
+        padding: 10px 12px !important;
+    }
+
+    /* selectbox / text_input を大きめに */
+    [data-testid="stSelectbox"] > div > div,
+    [data-testid="stTextInput"] > div > div > input {
+        font-size: 16px !important;
+        min-height: 44px !important;
+    }
+
+    /* カラムが3以上の場合でもスマホでは2列に */
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:nth-child(3)) > [data-testid="column"] {
+        min-width: calc(50% - 6px) !important;
+        flex: 1 1 calc(50% - 6px) !important;
+    }
 }
 
 /* ══ 共通コンポーネント ════════════════════════════════════ */
