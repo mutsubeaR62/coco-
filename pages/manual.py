@@ -476,11 +476,54 @@ def render_pdf_as_images(file_path: str, key_prefix: str = ""):
 
 
 # ─── ページヘッダー ──────────────────────────────────────────
-page_header("📋 マニュアル", "業務ルール & カレーマニュアル")
+page_header("マニュアル", "業務ルール & カレーマニュアル")
 
-tab_curry, tab_general, tab_sauce, tab_teisu = st.tabs([
-    "カレーマニュアル", "業務マニュアル", "ソース量表", "定数表"
+tab_search, tab_curry, tab_general, tab_sauce, tab_teisu = st.tabs([
+    "検索", "カレーマニュアル", "業務マニュアル", "ソース量表", "定数表"
 ])
+
+
+# ══════════════════════════════════════════════════════════════
+# TAB 0: 検索
+# ══════════════════════════════════════════════════════════════
+with tab_search:
+    st.markdown("#### キーワードで業務マニュアルを検索")
+    q = st.text_input("キーワード", placeholder="例: 笑顔、ドリンク、クレーム、衛生",
+                       label_visibility="collapsed")
+    if q:
+        manual_data = load_json(store_path("manual.json"))
+        sections    = manual_data.get("sections", []) if manual_data else []
+        if not sections:
+            sections = get_manual().get("sections", [])
+
+        hits = []
+        for sec in sections:
+            text = (sec.get("title","") + " " + sec.get("content","")).lower()
+            if q.lower() in text:
+                hits.append(sec)
+
+        if hits:
+            st.caption(f"{len(hits)} 件見つかりました")
+            for sec in hits:
+                # キーワードをハイライト
+                content = sec.get("content", "")
+                title   = sec.get("title", "")
+                icon    = sec.get("icon", "📌")
+                with st.expander(f"{icon} {title}"):
+                    # ヒット部分の前後100文字を抜粋して表示
+                    idx = content.lower().find(q.lower())
+                    if idx >= 0:
+                        start = max(0, idx - 80)
+                        end   = min(len(content), idx + len(q) + 80)
+                        snippet = ("..." if start > 0 else "") + content[start:end] + ("..." if end < len(content) else "")
+                        hi = snippet.replace(q, f"**{q}**").replace(q.upper(), f"**{q.upper()}**")
+                        st.markdown(hi)
+                        st.divider()
+                    st.markdown(content)
+        else:
+            st.info(f"「{q}」に一致するセクションはありませんでした。")
+    else:
+        st.caption("キーワードを入力すると業務マニュアルのセクションを横断検索できます。")
 
 
 # ══════════════════════════════════════════════════════════════

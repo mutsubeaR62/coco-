@@ -109,25 +109,27 @@ else:
     is_kenshu = role == "kenshu"
 
     main_pages = [
-        st.Page("pages/home.py",      title="ホーム",           icon="🏠", default=True),
-        st.Page("pages/manual.py",    title="マニュアル",       icon="📋"),
-        st.Page("pages/training.py",  title="新人研修",         icon="🎓"),
-        st.Page("pages/checklist.py", title="チェックリスト",   icon="✅"),
-        st.Page("pages/shift.py",        title="シフト申請",       icon="📅"),
-        st.Page("pages/profile.py",      title="マイプロフィール", icon="👤"),
-        st.Page("pages/nishimaki_bot.py", title="西牧Bot",   icon="🤖"),
-        st.Page("pages/cyber_mg.py",     title="Cyber MG", icon="💼"),
+        st.Page("pages/home.py",       title="ホーム",           icon=":material/home:",          default=True),
+        st.Page("pages/notices.py",    title="お知らせ",          icon=":material/campaign:"),
+        st.Page("pages/manual.py",     title="マニュアル",        icon=":material/menu_book:"),
+        st.Page("pages/training.py",   title="新人研修",          icon=":material/school:"),
+        st.Page("pages/checklist.py",  title="チェックリスト",    icon=":material/checklist:"),
+        st.Page("pages/shift.py",      title="シフト申請",        icon=":material/calendar_month:"),
+        st.Page("pages/profile.py",    title="マイプロフィール",  icon=":material/person:"),
+        st.Page("pages/incidents.py",  title="クレーム記録",      icon=":material/report:"),
+        st.Page("pages/nishimaki_bot.py", title="西牧Bot",        icon=":material/smart_toy:"),
+        st.Page("pages/cyber_mg.py",   title="Cyber MG",          icon=":material/work:"),
     ]
     if not is_kenshu:
-        main_pages.insert(2, st.Page("pages/orders.py", title="発注管理", icon="📦"))
+        main_pages.insert(3, st.Page("pages/orders.py", title="発注管理", icon=":material/inventory_2:"))
 
     nav = {"メインメニュー": main_pages}
 
     from utils import is_manager
     if is_manager(user):
         nav["管理者"] = [
-            st.Page("pages/admin.py",        title="管理者設定",  icon="⚙️"),
-            st.Page("pages/shift_manage.py", title="シフト管理",  icon="📋"),
+            st.Page("pages/admin.py",        title="管理者設定",  icon=":material/admin_panel_settings:"),
+            st.Page("pages/shift_manage.py", title="シフト管理",  icon=":material/edit_calendar:"),
         ]
 
     pg = st.navigation(nav)

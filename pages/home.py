@@ -5,7 +5,7 @@ from datetime import datetime
 from utils import (apply_theme, require_login, page_header, get_progress,
                    STAMPS, ROLE_LABELS, get_today_birthdays, coco_spec_badge,
                    get_coco_spec, is_manager, get_all_users, load_json, save_json, store_path,
-                   get_store_settings)
+                   get_store_settings, get_shift_schedule)
 
 apply_theme()
 require_login()
@@ -25,6 +25,40 @@ page_header(
     f"おかえり、{user['name']}さん！ 🍛",
     f"{_store_full} — {datetime.now().strftime('%Y年%m月%d日 (%a)')}"
 )
+
+# ─── 未読お知らせバナー ───────────────────────────────────────
+def _unread_notices():
+    today   = datetime.now().strftime("%Y-%m-%d")
+    notices = load_json(store_path("notices.json"), {"notices": []})["notices"]
+    count   = 0
+    for n in notices:
+        if username in n.get("reads", []):
+            continue
+        target = n.get("target", "all")
+        if target == "all":
+            count += 1
+        elif isinstance(target, str) and target.startswith("shift:"):
+            sched = get_shift_schedule(target.split(":", 1)[1])
+            if username in sched.get("members", []):
+                count += 1
+        elif isinstance(target, list) and username in target:
+            count += 1
+    return count
+
+_unread = _unread_notices()
+if _unread > 0:
+    st.markdown(
+        f"<div style='background:#fff3e0;border:1.5px solid #e85d04;border-radius:12px;"
+        f"padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;gap:12px;'>"
+        f"<span style='font-size:1.4rem;'>📢</span>"
+        f"<div>"
+        f"<span style='font-weight:700;color:#e85d04;'>未読のお知らせが {_unread} 件あります</span>"
+        f"</div></div>",
+        unsafe_allow_html=True,
+    )
+    if st.button("お知らせを確認する", type="primary"):
+        st.switch_page("pages/notices.py")
+    st.write("")
 
 # ─── 誕生日バナー ─────────────────────────────────────────────
 _all_users = get_all_users()
